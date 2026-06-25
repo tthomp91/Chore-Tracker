@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Family Chores">
+<title>Family Chores</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --amelia:        #EC4899;
+    --amelia-light:  #FDF2F8;
+    --amelia-mid:    #FBCFE8;
+    --amelia-border: #F9A8D4;
+
+    --lucas:        #16A34A;
+    --lucas-light:  #F0FDF4;
+    --lucas-mid:    #BBF7D0;
+    --lucas-border: #86EFAC;
+
+    --taylor:        #2563EB;
+    --taylor-light:  #EFF6FF;
+    --taylor-mid:    #BFDBFE;
+    --taylor-border: #93C5FD;
+
+    --kara:        #9333EA;
+    --kara-light:  #FAF5FF;
+    --kara-mid:    #E9D5FF;
+    --kara-border: #D8B4FE;
+
+    --shared:        #0891B2;
+    --shared-light:  #ECFEFF;
+    --shared-mid:    #A5F3FC;
+    --shared-border: #67E8F9;
+
+    --open:        #64748B;
+    --open-light:  #F8FAFC;
+    --open-mid:    #E2E8F0;
+    --open-border: #CBD5E1;
+
+    --bg:       #F1F5F9;
+    --col-bg:   #FFFFFF;
+    --col-head: #F8FAFC;
+    --text:     #0F172A;
+    --muted:    #64748B;
+    --border:   #E2E8F0;
+  }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; flex-direction: column; height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px 8px; flex-shrink: 0;
+  }
+  .header-title { font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: var(--text); }
+  .header-date  { font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .hbtn {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 16px; font-size: 13px; font-weight: 600;
+    cursor: pointer; color: var(--muted); font-family: inherit; transition: all .15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .hbtn:hover { color: var(--text); border-color: #cbd5e1; }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 6px; padding: 0 20px 10px; flex-shrink: 0; flex-wrap: wrap; }
+  .pill {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 11px 4px 7px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    border: 1px solid;
+  }
+  .pdot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* COLUMNS */
+  .cols {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; padding: 0 10px 10px; flex: 1; min-height: 0;
+  }
+  .col {
+    background: var(--col-bg); border-radius: 20px;
+    display: flex; flex-direction: column; overflow: hidden; min-height: 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .col-head {
+    background: var(--col-head); padding: 13px 16px 11px;
+    flex-shrink: 0; border-bottom: 1px solid var(--border);
+  }
+  .col-head-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .col-head-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .chore-list {
+    flex: 1; overflow-y: auto; padding: 7px 7px 4px;
+    display: flex; flex-direction: column; gap: 5px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .chore-list::-webkit-scrollbar { display: none; }
+
+  .day-div {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--muted); padding: 6px 6px 2px;
+  }
+
+  /* CHORE ROW */
+  .chore {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 12px;
+    cursor: pointer; border-left: 4px solid transparent;
+    transition: transform .1s, opacity .2s;
+    user-select: none;
+  }
+  .chore:active { transform: scale(0.98); }
+  .chore.all-done { opacity: 0.3; }
+
+  .cbody { flex: 1; min-width: 0; }
+  .cname {
+    font-size: 14px; font-weight: 700; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--text);
+  }
+  .chore.all-done .cname { text-decoration: line-through; color: var(--muted); }
+
+  /* WHO TAGS row */
+  .cwho-row {
+    display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap;
+  }
+  .who-tag {
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px; border: 1.5px solid;
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .who-tag.done-tag {
+    opacity: 0.35;
+    text-decoration: line-through;
+  }
+
+  .pay-tag {
+    font-size: 12px; font-weight: 800;
+    padding: 3px 9px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;
+    border: 1px solid;
+  }
+
+  .col-footer { padding: 5px 7px 7px; flex-shrink: 0; }
+  .add-btn {
+    width: 100%; padding: 8px; border-radius: 10px;
+    border: 1.5px dashed #cbd5e1; background: none; color: var(--muted);
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    transition: all .15s;
+  }
+  .add-btn:hover { border-color: #94a3b8; color: var(--text); }
+  .empty { padding: 16px 6px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* MODALS */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; padding: 20px;
+  }
+  .modal {
+    background: #fff; border-radius: 22px; padding: 26px;
+    width: 100%; max-width: 360px; border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal h2  { font-size: 19px; font-weight: 800; margin-bottom: 5px; color: var(--text); }
+  .modal p   { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .modal label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--muted); display: block; margin-bottom: 5px;
+  }
+  .modal input, .modal select {
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--border);
+    border-radius: 11px; font-size: 14px; margin-bottom: 12px;
+    background: var(--bg); color: var(--text); outline: none; font-family: inherit;
+  }
+  .modal input:focus, .modal select:focus { border-color: #94a3b8; }
+  .mrow { display: flex; gap: 10px; margin-top: 4px; }
+  .mbtn {
+    flex: 1; padding: 12px; border-radius: 11px; font-size: 14px;
+    font-weight: 700; cursor: pointer; font-family: inherit; border: none; transition: opacity .15s;
+  }
+  .mbtn-ok  { background: var(--text); color: #fff; }
+  .mbtn-ok:hover  { opacity: 0.85; }
+  .mbtn-no  { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+  .mbtn-no:hover  { color: var(--text); }
+  .mbtn-del { background: #DC2626; color: #fff; }
+
+  /* PIN PAD */
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 16px 0 20px; }
+  .pdot2 {
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid #cbd5e1; background: transparent; transition: all .15s;
+  }
+  .pdot2.on { background: var(--text); border-color: var(--text); }
+  .pin-pad  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .pkey {
+    padding: 15px; border-radius: 13px; background: var(--bg); border: 1px solid var(--border);
+    font-size: 20px; font-weight: 700; color: var(--text);
+    cursor: pointer; transition: background .12s; font-family: inherit;
+  }
+  .pkey:hover { background: #e2e8f0; }
+  .perr { color: #DC2626; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+
+  .danger-zone { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Family Chores</div>
+    <div class="header-date" id="hdate"></div>
+  </div>
+  <button class="hbtn" onclick="openPin()">⚙ Settings</button>
+</div>
+
+<div class="legend">
+  <div class="pill" style="background:var(--amelia-light);color:var(--amelia);border-color:var(--amelia-border)"><div class="pdot" style="background:var(--amelia)"></div>Amelia</div>
+  <div class="pill" style="background:var(--lucas-light);color:var(--lucas);border-color:var(--lucas-border)"><div class="pdot" style="background:var(--lucas)"></div>Lucas</div>
+  <div class="pill" style="background:var(--taylor-light);color:var(--taylor);border-color:var(--taylor-border)"><div class="pdot" style="background:var(--taylor)"></div>Taylor</div>
+  <div class="pill" style="background:var(--kara-light);color:var(--kara);border-color:var(--kara-border)"><div class="pdot" style="background:var(--kara)"></div>Kara</div>
+  <div class="pill" style="background:var(--shared-light);color:var(--shared);border-color:var(--shared-border)"><div class="pdot" style="background:var(--shared)"></div>Taylor & Kara</div>
+</div>
+
+<div class="cols">
+  <div class="col">
+    <div class="col-head"><div class="col-head-title">Daily</div><div class="col-head-sub">Every day</div></div>
+    <div class="chore-list" id="list-daily"></div>
+    <div class="col-footer"><button class="add-btn" onclick="openAdd('daily')">+ Add daily chore</button></div>
+  </div>
+  <div class="col">
+    <div class="col-head"><div class="col-head-title">Weekly</div><div class="col-head-sub">By day of the week</div></div>
+    <div class="chore-list" id="list-weekly"></div>
+    <div class="col-footer"><button class="add-btn" onclick="openAdd('weekly')">+ Add weekly chore</button></div>
+  </div>
+  <div class="col">
+    <div class="col-head"><div class="col-head-title">Bonus / Paid</div><div class="col-head-sub">Earn extra cash</div></div>
+    <div class="chore-list" id="list-paid"></div>
+    <div class="col-footer"><button class="add-btn" onclick="openAdd('paid')">+ Add paid chore</button></div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="add-ov" style="display:none" onclick="if(event.target===this)closeAdd()">
+  <div class="modal">
+    <h2 id="add-h">Add chore</h2><p id="add-p"></p>
+    <label>Chore name</label><input id="add-name" placeholder="e.g. Vacuum living room">
+    <label>Assigned to</label>
+    <select id="add-who">
+      <option value="Both">Both kids (Amelia & Lucas)</option>
+      <option value="Amelia">Amelia only</option>
+      <option value="Lucas">Lucas only</option>
+      <option value="Taylor">Taylor</option>
+      <option value="Kara">Kara</option>
+      <option value="Shared">Taylor & Kara (shared)</option>
+      <option value="Open">Anyone (unassigned)</option>
+    </select>
+    <div id="add-day-w">
+      <label>Day of week</label>
+      <select id="add-day">
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+        <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+      </select>
+    </div>
+    <div id="add-pay-w" style="display:none">
+      <label>Pay amount</label><input id="add-pay" placeholder="e.g. $2 per dog">
+    </div>
+    <div class="mrow">
+      <button class="mbtn mbtn-no" onclick="closeAdd()">Cancel</button>
+      <button class="mbtn mbtn-ok" onclick="saveChore()">Add chore</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="overlay" id="del-ov" style="display:none" onclick="if(event.target===this)closeDel()">
+  <div class="modal">
+    <h2>Remove this chore?</h2><p id="del-lbl"></p>
+    <div class="mrow">
+      <button class="mbtn mbtn-no" onclick="closeDel()">Keep it</button>
+      <button class="mbtn mbtn-del" onclick="confirmDel()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="overlay" id="pin-ov" style="display:none" onclick="if(event.target===this)closePin()">
+  <div class="modal">
+    <h2>Enter PIN</h2><p>Default PIN is 1234</p>
+    <div class="pin-dots">
+      <div class="pdot2" id="pd0"></div><div class="pdot2" id="pd1"></div>
+      <div class="pdot2" id="pd2"></div><div class="pdot2" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pkey" onclick="pk('1')">1</button>
+      <button class="pkey" onclick="pk('2')">2</button>
+      <button class="pkey" onclick="pk('3')">3</button>
+      <button class="pkey" onclick="pk('4')">4</button>
+      <button class="pkey" onclick="pk('5')">5</button>
+      <button class="pkey" onclick="pk('6')">6</button>
+      <button class="pkey" onclick="pk('7')">7</button>
+      <button class="pkey" onclick="pk('8')">8</button>
+      <button class="pkey" onclick="pk('9')">9</button>
+      <button class="pkey" onclick="pk('back')" style="font-size:16px">⌫</button>
+      <button class="pkey" onclick="pk('0')">0</button>
+      <button class="pkey" onclick="closePin()" style="font-size:13px;color:var(--muted)">✕</button>
+    </div>
+    <div class="perr" id="perr"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="set-ov" style="display:none" onclick="if(event.target===this)closeSet()">
+  <div class="modal">
+    <h2>Settings</h2><p>Change your PIN or reset chores.</p>
+    <label>Current PIN</label><input id="sc" type="password" maxlength="4" placeholder="Current PIN">
+    <label>New PIN (4 digits)</label><input id="sn" type="password" maxlength="4" placeholder="New PIN">
+    <div class="perr" id="serr"></div>
+    <div class="mrow" style="margin-top:8px">
+      <button class="mbtn mbtn-no" onclick="closeSet()">Close</button>
+      <button class="mbtn mbtn-ok" onclick="savePin()">Save PIN</button>
+    </div>
+    <div class="danger-zone">
+      <button class="mbtn mbtn-del" style="width:100%" onclick="resetAll()">Reset all completed chores</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// Color theme per person
+const THEME = {
+  Amelia: { color:'var(--amelia)', light:'var(--amelia-light)', mid:'var(--amelia-mid)', border:'var(--amelia-border)' },
+  Lucas:  { color:'var(--lucas)',  light:'var(--lucas-light)',  mid:'var(--lucas-mid)',  border:'var(--lucas-border)'  },
+  Taylor: { color:'var(--taylor)', light:'var(--taylor-light)', mid:'var(--taylor-mid)', border:'var(--taylor-border)' },
+  Kara:   { color:'var(--kara)',   light:'var(--kara-light)',   mid:'var(--kara-mid)',   border:'var(--kara-border)'   },
+  Shared: { color:'var(--shared)', light:'var(--shared-light)', mid:'var(--shared-mid)', border:'var(--shared-border)' },
+  Open:   { color:'var(--open)',   light:'var(--open-light)',   mid:'var(--open-mid)',   border:'var(--open-border)'   },
+};
+
+// For "Both" chores: who are the two kids
+const BOTH_KIDS = ['Amelia', 'Lucas'];
+
+// Default chore data
+// For "Both" chores, we store who:'Both' and doneBy:[] (array of names who've done it)
+// For single-person chores: who:'Name', done:bool
+const DEFAULTS = {
+  daily: [
+    { id:'fd', name:'Feed & let dogs out',       who:'Both',   doneBy:[] },
+    { id:'ed', name:'Empty dishwasher',          who:'Both',   doneBy:[] },
+    { id:'sk', name:'Sweep under kitchen table', who:'Both',   doneBy:[] },
+    { id:'tr', name:'Tidy room',                 who:'Both',   doneBy:[] },
+    { id:'wt', name:'Wipe off table',            who:'Both',   doneBy:[] },
+  ],
+  weekly: [
+    { id:'wl', name:'Laundry',              who:'Both',   doneBy:[], day:'Monday'    },
+    { id:'wd', name:'Dishes',               who:'Both',   doneBy:[], day:'Tuesday'   },
+    { id:'wp', name:'Pick up sticks/weeds', who:'Both',   doneBy:[], day:'Wednesday' },
+    { id:'wv', name:'Vacuum upstairs',      who:'Both',   doneBy:[], day:'Thursday'  },
+    { id:'wb', name:'Clean bathroom',       who:'Both',   doneBy:[], day:'Friday'    },
+    { id:'wc', name:'Clean out car',        who:'Both',   doneBy:[], day:'Saturday'  },
+    { id:'tt', name:'Take out trash',       who:'Taylor', done:false, day:'Wednesday' },
+    { id:'kb', name:'Clean our bathroom',   who:'Shared', done:false, day:'Saturday'  },
+  ],
+  paid: [
+    { id:'pv', name:'Vacuum main level',          who:'Open', pay:'$1',          done:false },
+    { id:'pb', name:'Book report',                who:'Open', pay:'$5',          done:false },
+    { id:'pw', name:'Clean windows - main level', who:'Open', pay:'$2 per kid',  done:false },
+    { id:'pm', name:'Mop main level',             who:'Open', pay:'$2',          done:false },
+    { id:'pd', name:'Dusting',                    who:'Open', pay:'$1 per level',done:false },
+    { id:'ps', name:'Swiffer main level',         who:'Open', pay:'$1',          done:false },
+    { id:'pg', name:'Wash the dogs',              who:'Open', pay:'$2 per dog',  done:false },
+  ],
+};
+
+let S = load();
+let pinBuf = '', delTarget = null, addCol = null;
+
+function load() {
+  try {
+    const raw = localStorage.getItem('familychores_v5');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { chores: JSON.parse(JSON.stringify(DEFAULTS)), pin: '1234' };
+}
+function save() {
+  try { localStorage.setItem('familychores_v5', JSON.stringify(S)); } catch(e) {}
+}
+
+// ── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  document.getElementById('hdate').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  renderList('daily');
+  renderWeekly();
+  renderList('paid');
+}
+
+function renderList(type) {
+  const el = document.getElementById('list-' + type);
+  el.innerHTML = '';
+  const list = S.chores[type];
+  if (!list || !list.length) { el.innerHTML = '<div class="empty">No chores yet — add one below</div>'; return; }
+  list.forEach(c => el.appendChild(makeChore(c, type)));
+}
+
+function renderWeekly() {
+  const el = document.getElementById('list-weekly');
+  el.innerHTML = '';
+  const byDay = {};
+  DAYS.forEach(d => byDay[d] = []);
+  S.chores.weekly.forEach(c => { if (byDay[c.day]) byDay[c.day].push(c); });
+  let any = false;
+  DAYS.forEach(day => {
+    if (!byDay[day].length) return;
+    any = true;
+    const div = document.createElement('div');
+    div.className = 'day-div';
+    div.textContent = day;
+    el.appendChild(div);
+    byDay[day].forEach(c => el.appendChild(makeChore(c, 'weekly')));
+  });
+  if (!any) el.innerHTML = '<div class="empty">No weekly chores yet</div>';
+}
+
+function isAllDone(c) {
+  if (c.who === 'Both') return BOTH_KIDS.every(k => (c.doneBy||[]).includes(k));
+  return !!c.done;
+}
+
+function makeChore(c, type) {
+  const el = document.createElement('div');
+  const allDone = isAllDone(c);
+  el.className = 'chore' + (allDone ? ' all-done' : '');
+
+  // Determine primary theme color for the left border & background
+  let primaryWho = c.who === 'Both' ? 'Open' : c.who;
+  // For "Both" chores, use a neutral border; individual tags show colors
+  const t = c.who === 'Both' ? THEME.Open : (THEME[c.who] || THEME.Open);
+
+  el.style.background = c.who === 'Both' ? '#FAFAFA' : t.light;
+  el.style.borderLeftColor = c.who === 'Both' ? '#CBD5E1' : t.border;
+
+  // Build who tags
+  let whoHTML = '';
+  if (c.who === 'Both') {
+    BOTH_KIDS.forEach(kid => {
+      const kt = THEME[kid];
+      const done = (c.doneBy||[]).includes(kid);
+      whoHTML += `<span class="who-tag ${done ? 'done-tag' : ''}"
+        style="color:${kt.color};background:${kt.light};border-color:${kt.border}"
+        data-kid="${kid}" data-id="${c.id}" data-type="${type}">${kid}</span>`;
+    });
+  } else if (c.who === 'Shared') {
+    whoHTML = `<span class="who-tag ${allDone ? 'done-tag' : ''}"
+      style="color:var(--shared);background:var(--shared-light);border-color:var(--shared-border)">Taylor & Kara</span>`;
+  } else {
+    const wt = THEME[c.who] || THEME.Open;
+    const label = c.who === 'Open' ? 'Anyone' : c.who;
+    whoHTML = `<span class="who-tag ${allDone ? 'done-tag' : ''}"
+      style="color:${wt.color};background:${wt.light};border-color:${wt.border}">${label}</span>`;
+  }
+
+  const badge = type === 'paid'
+    ? `<div class="pay-tag" style="color:${t.color};border-color:${t.border};background:${t.light}">${c.pay||'$?'}</div>`
+    : '';
+
+  el.innerHTML = `
+    <div class="cbody">
+      <div class="cname">${c.name}</div>
+      <div class="cwho-row">${whoHTML}</div>
+    </div>${badge}`;
+
+  // Clicking individual kid tags on "Both" chores
+  if (c.who === 'Both') {
+    el.querySelectorAll('.who-tag').forEach(tag => {
+      tag.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleKid(c.id, type, tag.dataset.kid);
+      });
+    });
+    // clicking the chore body (not a tag) does nothing for "Both" chores
+  } else {
+    // single person — tap the whole row to toggle
+    el.addEventListener('click', () => toggleSingle(c.id, type));
+  }
+
+  // long-press / right-click to delete
+  let pressTimer;
+  el.addEventListener('touchstart', () => { pressTimer = setTimeout(() => openDel(c.id, type, c.name), 600); }, { passive: true });
+  el.addEventListener('touchend',   () => clearTimeout(pressTimer));
+  el.addEventListener('touchmove',  () => clearTimeout(pressTimer));
+  el.addEventListener('contextmenu', e => { e.preventDefault(); openDel(c.id, type, c.name); });
+
+  return el;
+}
+
+function toggleKid(id, type, kid) {
+  const c = S.chores[type].find(x => x.id === id);
+  if (!c) return;
+  if (!c.doneBy) c.doneBy = [];
+  if (c.doneBy.includes(kid)) {
+    c.doneBy = c.doneBy.filter(k => k !== kid);
+  } else {
+    c.doneBy.push(kid);
+  }
+  save(); render();
+}
+
+function toggleSingle(id, type) {
+  const c = S.chores[type].find(x => x.id === id);
+  if (c) { c.done = !c.done; save(); render(); }
+}
+
+// ── ADD ──────────────────────────────────────────────────────────────────────
+function openAdd(col) {
+  addCol = col;
+  const titles = { daily:'Add daily chore', weekly:'Add weekly chore', paid:'Add paid chore' };
+  const subs   = { daily:'Appears every day', weekly:'Pinned to a day of the week', paid:'Kids can earn money for this' };
+  document.getElementById('add-h').textContent = titles[col];
+  document.getElementById('add-p').textContent = subs[col];
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-pay').value  = '';
+  document.getElementById('add-day-w').style.display = col === 'weekly' ? '' : 'none';
+  document.getElementById('add-pay-w').style.display = col === 'paid'   ? '' : 'none';
+  document.getElementById('add-ov').style.display = 'flex';
+  setTimeout(() => document.getElementById('add-name').focus(), 100);
+}
+function closeAdd() { document.getElementById('add-ov').style.display = 'none'; }
+function saveChore() {
+  const name = document.getElementById('add-name').value.trim();
+  if (!name) return;
+  const who = document.getElementById('add-who').value;
+  const base = { id: 'c' + Date.now(), name };
+  if (addCol === 'weekly') base.day = document.getElementById('add-day').value;
+  if (addCol === 'paid')   base.pay = document.getElementById('add-pay').value || '$?';
+
+  if (who === 'Both') {
+    base.who = 'Both';
+    base.doneBy = [];
+  } else {
+    base.who = who;
+    base.done = false;
+  }
+  S.chores[addCol].push(base);
+  save(); render(); closeAdd();
+}
+
+// ── DELETE ───────────────────────────────────────────────────────────────────
+function openDel(id, type, name) {
+  delTarget = { id, type };
+  document.getElementById('del-lbl').textContent = '"' + name + '" will be permanently removed.';
+  document.getElementById('del-ov').style.display = 'flex';
+}
+function closeDel() { document.getElementById('del-ov').style.display = 'none'; delTarget = null; }
+function confirmDel() {
+  if (!delTarget) return;
+  S.chores[delTarget.type] = S.chores[delTarget.type].filter(c => c.id !== delTarget.id);
+  save(); render(); closeDel();
+}
+
+// ── PIN ──────────────────────────────────────────────────────────────────────
+function openPin() {
+  pinBuf = '';
+  document.getElementById('perr').textContent = '';
+  updateDots();
+  document.getElementById('pin-ov').style.display = 'flex';
+}
+function closePin() { document.getElementById('pin-ov').style.display = 'none'; pinBuf = ''; }
+function pk(k) {
+  if (k === 'back') { pinBuf = pinBuf.slice(0, -1); updateDots(); return; }
+  if (pinBuf.length >= 4) return;
+  pinBuf += k; updateDots();
+  if (pinBuf.length === 4) {
+    setTimeout(() => {
+      if (pinBuf === S.pin) { closePin(); openSet(); }
+      else {
+        document.getElementById('perr').textContent = 'Wrong PIN — try again';
+        pinBuf = ''; updateDots();
+      }
+    }, 150);
+  }
+}
+function updateDots() {
+  for (let i = 0; i < 4; i++)
+    document.getElementById('pd' + i).classList.toggle('on', i < pinBuf.length);
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+function openSet() {
+  document.getElementById('sc').value = '';
+  document.getElementById('sn').value = '';
+  document.getElementById('serr').textContent = '';
+  document.getElementById('set-ov').style.display = 'flex';
+}
+function closeSet() { document.getElementById('set-ov').style.display = 'none'; }
+function savePin() {
+  const cur = document.getElementById('sc').value;
+  const nw  = document.getElementById('sn').value;
+  if (cur !== S.pin)           { document.getElementById('serr').textContent = 'Current PIN is wrong'; return; }
+  if (!/^\d{4}$/.test(nw))    { document.getElementById('serr').textContent = 'PIN must be exactly 4 digits'; return; }
+  S.pin = nw; save();
+  document.getElementById('serr').textContent = '';
+  closeSet();
+}
+function resetAll() {
+  if (!confirm('Clear all completed chores? This cannot be undone.')) return;
+  ['daily','weekly','paid'].forEach(t => S.chores[t].forEach(c => {
+    if (c.who === 'Both') c.doneBy = [];
+    else c.done = false;
+  }));
+  save(); render(); closeSet();
+}
+
+// ── KEYBOARD ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('add-ov').style.display !== 'none') saveChore();
+  if (e.key === 'Escape') { closeAdd(); closeDel(); closePin(); closeSet(); }
+});
+
+render();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Family Chores">
+<title>Family Chores</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --amelia:        #EC4899;
+    --amelia-light:  #FDF2F8;
+    --amelia-mid:    #FBCFE8;
+    --amelia-border: #F9A8D4;
+
+    --lucas:        #16A34A;
+    --lucas-light:  #F0FDF4;
+    --lucas-mid:    #BBF7D0;
+    --lucas-border: #86EFAC;
+
+    --taylor:        #2563EB;
+    --taylor-light:  #EFF6FF;
+    --taylor-mid:    #BFDBFE;
+    --taylor-border: #93C5FD;
+
+    --kara:        #9333EA;
+    --kara-light:  #FAF5FF;
+    --kara-mid:    #E9D5FF;
+    --kara-border: #D8B4FE;
+
+    --shared:        #0891B2;
+    --shared-light:  #ECFEFF;
+    --shared-mid:    #A5F3FC;
+    --shared-border: #67E8F9;
+
+    --open:        #64748B;
+    --open-light:  #F8FAFC;
+    --open-mid:    #E2E8F0;
+    --open-border: #CBD5E1;
+
+    --bg:       #F1F5F9;
+    --col-bg:   #FFFFFF;
+    --col-head: #F8FAFC;
+    --text:     #0F172A;
+    --muted:    #64748B;
+    --border:   #E2E8F0;
+  }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; flex-direction: column; height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px 8px; flex-shrink: 0;
+  }
+  .header-title { font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: var(--text); }
+  .header-date  { font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .hbtn {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 16px; font-size: 13px; font-weight: 600;
+    cursor: pointer; color: var(--muted); font-family: inherit; transition: all .15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .hbtn:hover { color: var(--text); border-color: #cbd5e1; }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 6px; padding: 0 20px 10px; flex-shrink: 0; flex-wrap: wrap; }
+  .pill {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 11px 4px 7px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    border: 1px solid;
+  }
+  .pdot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* COLUMNS */
+  .cols {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; padding: 0 10px 10px; flex: 1; min-height: 0;
+  }
+  .col {
+    background: var(--col-bg); border-radius: 20px;
+    display: flex; flex-direction: column; overflow: hidden; min-height: 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .col-head {
+    background: var(--col-head); padding: 13px 16px 11px;
+    flex-shrink: 0; border-bottom: 1px solid var(--border);
+  }
+  .col-head-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .col-head-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .chore-list {
+    flex: 1; overflow-y: auto; padding: 7px 7px 4px;
+    display: flex; flex-direction: column; gap: 5px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .chore-list::-webkit-scrollbar { display: none; }
+
+  .day-div {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--muted); padding: 6px 6px 2px;
+  }
+
+  /* CHORE ROW */
+  .chore {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 12px;
+    cursor: pointer; border-left: 4px solid transparent;
+    transition: transform .1s, opacity .2s;
+    user-select: none;
+  }
+  .chore:active { transform: scale(0.98); }
+  .chore.all-done { opacity: 0.3; }
+
+  .cbody { flex: 1; min-width: 0; }
+  .cname {
+    font-size: 14px; font-weight: 700; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--text);
+  }
+  .chore.all-done .cname { text-decoration: line-through; color: var(--muted); }
+
+  /* WHO TAGS row */
+  .cwho-row {
+    display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap;
+  }
+  .who-tag {
+    font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px; border: 1.5px solid;
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .who-tag.done-tag {
+    opacity: 0.35;
+    text-decoration: line-through;
+  }
+
+  .pay-tag {
+    font-size: 12px; font-weight: 800;
+    padding: 3px 9px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;
+    border: 1px solid;
+  }
+
+  .col-footer { padding: 5px 7px 7px; flex-shrink: 0; }
+  .add-btn {
+    width: 100%; padding: 8px; border-radius: 10px;
+    border: 1.5px dashed #cbd5e1; background: none; color: var(--muted);
+    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    transition: all .15s;
+  }
+  .add-btn:hover { border-color: #94a3b8; color: var(--text); }
+  .empty { padding: 16px 6px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* MODALS */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; padding: 20px;
+  }
+  .modal {
+    background: #fff; border-radius: 22px; padding: 26px;
+    width: 100%; max-width: 360px; border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal h2  { font-size: 19px; font-weight: 800; margin-bottom: 5px; color: var(--text); }
+  .modal p   { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .modal label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--muted); display: block; margin-bottom: 5px;
+  }
+  .modal input, .modal select {
+    width: 100%; padding: 11px 13px; border: 1.5px solid var(--border);
+    border-radius: 11px; font-size: 14px; margin-bottom: 12px;
+    background: var(--bg); color: var(--text); outline: none; font-family: inherit;
+  }
+  .modal input:focus, .modal select:focus { border-color: #94a3b8; }
+  .mrow { display: flex; gap: 10px; margin-top: 4px; }
+  .mbtn {
+    flex: 1; padding: 12px; border-radius: 11px; font-size: 14px;
+    font-weight: 700; cursor: pointer; font-family: inherit; border: none; transition: opacity .15s;
+  }
+  .mbtn-ok  { background: var(--text); color: #fff; }
+  .mbtn-ok:hover  { opacity: 0.85; }
+  .mbtn-no  { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+  .mbtn-no:hover  { color: var(--text); }
+  .mbtn-del { background: #DC2626; color: #fff; }
+
+  /* PIN PAD */
+  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 16px 0 20px; }
+  .pdot2 {
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid #cbd5e1; background: transparent; transition: all .15s;
+  }
+  .pdot2.on { background: var(--text); border-color: var(--text); }
+  .pin-pad  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .pkey {
+    padding: 15px; border-radius: 13px; background: var(--bg); border: 1px solid var(--border);
+    font-size: 20px; font-weight: 700; color: var(--text);
+    cursor: pointer; transition: background .12s; font-family: inherit;
+  }
+  .pkey:hover { background: #e2e8f0; }
+  .perr { color: #DC2626; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+
+  .danger-zone { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Family Chores</div>
+    <div class="header-date" id="hdate"></div>
+  </div>
+  <button class="hbtn" onclick="openPin()">⚙ Settings</button>
+</div>
+
+<div class="legend">
+  <div class="pill" style="background:var(--amelia-light);color:var(--amelia);border-color:var(--amelia-border)"><div class="pdot" style="background:var(--amelia)"></div>Amelia</div>
+  <div class="pill" style="background:var(--lucas-light);color:var(--lucas);border-color:var(--lucas-border)"><div class="pdot" style="background:var(--lucas)"></div>Lucas</div>
+  <div class="pill" style="background:var(--taylor-light);color:var(--taylor);border-color:var(--taylor-border)"><div class="pdot" style="background:var(--taylor)"></div>Taylor</div>
+  <div class="pill" style="background:var(--kara-light);color:var(--kara);border-color:var(--kara-border)"><div class="pdot" style="background:var(--kara)"></div>Kara</div>
+  <div class="pill" style="background:var(--shared-light);color:var(--shared);border-color:var(--shared-border)"><div class="pdot" style="background:var(--shared)"></div>Taylor & Kara</div>
+</div>
+
+<div class="cols">
+  <div class="col">
+    <div class="col-head"><div class="col-head-title">Daily</div><div class="col-head-sub">Every day</div></div>
+    <div class="chore-list" id="list-daily"></div>
+    <div class="col-footer"><button class="add-btn" onclick="openAdd('daily')">+ Add daily chore</button></div>
+  </div>
+  <div class="col">
+    <div class="col-head"><div class="col-head-title">Weekly</div><div class="col-head-sub">By day of the week</div></div>
+    <div class="chore-list" id="list-weekly"></div>
+    <div class="col-footer"><button class="add-btn" onclick="openAdd('weekly')">+ Add weekly chore</button></div>
+  </div>
+  <div class="col">
+    <div class="col-head"><div class="col-head-title">Bonus / Paid</div><div class="col-head-sub">Earn extra cash</div></div>
+    <div class="chore-list" id="list-paid"></div>
+    <div class="col-footer"><button class="add-btn" onclick="openAdd('paid')">+ Add paid chore</button></div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="add-ov" style="display:none" onclick="if(event.target===this)closeAdd()">
+  <div class="modal">
+    <h2 id="add-h">Add chore</h2><p id="add-p"></p>
+    <label>Chore name</label><input id="add-name" placeholder="e.g. Vacuum living room">
+    <label>Assigned to</label>
+    <select id="add-who">
+      <option value="Both">Both kids (Amelia & Lucas)</option>
+      <option value="Amelia">Amelia only</option>
+      <option value="Lucas">Lucas only</option>
+      <option value="Taylor">Taylor</option>
+      <option value="Kara">Kara</option>
+      <option value="Shared">Taylor & Kara (shared)</option>
+      <option value="Open">Anyone (unassigned)</option>
+    </select>
+    <div id="add-day-w">
+      <label>Day of week</label>
+      <select id="add-day">
+        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+        <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+      </select>
+    </div>
+    <div id="add-pay-w" style="display:none">
+      <label>Pay amount</label><input id="add-pay" placeholder="e.g. $2 per dog">
+    </div>
+    <div class="mrow">
+      <button class="mbtn mbtn-no" onclick="closeAdd()">Cancel</button>
+      <button class="mbtn mbtn-ok" onclick="saveChore()">Add chore</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="overlay" id="del-ov" style="display:none" onclick="if(event.target===this)closeDel()">
+  <div class="modal">
+    <h2>Remove this chore?</h2><p id="del-lbl"></p>
+    <div class="mrow">
+      <button class="mbtn mbtn-no" onclick="closeDel()">Keep it</button>
+      <button class="mbtn mbtn-del" onclick="confirmDel()">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="overlay" id="pin-ov" style="display:none" onclick="if(event.target===this)closePin()">
+  <div class="modal">
+    <h2>Enter PIN</h2><p>Default PIN is 1234</p>
+    <div class="pin-dots">
+      <div class="pdot2" id="pd0"></div><div class="pdot2" id="pd1"></div>
+      <div class="pdot2" id="pd2"></div><div class="pdot2" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pkey" onclick="pk('1')">1</button>
+      <button class="pkey" onclick="pk('2')">2</button>
+      <button class="pkey" onclick="pk('3')">3</button>
+      <button class="pkey" onclick="pk('4')">4</button>
+      <button class="pkey" onclick="pk('5')">5</button>
+      <button class="pkey" onclick="pk('6')">6</button>
+      <button class="pkey" onclick="pk('7')">7</button>
+      <button class="pkey" onclick="pk('8')">8</button>
+      <button class="pkey" onclick="pk('9')">9</button>
+      <button class="pkey" onclick="pk('back')" style="font-size:16px">⌫</button>
+      <button class="pkey" onclick="pk('0')">0</button>
+      <button class="pkey" onclick="closePin()" style="font-size:13px;color:var(--muted)">✕</button>
+    </div>
+    <div class="perr" id="perr"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="set-ov" style="display:none" onclick="if(event.target===this)closeSet()">
+  <div class="modal">
+    <h2>Settings</h2><p>Change your PIN or reset chores.</p>
+    <label>Current PIN</label><input id="sc" type="password" maxlength="4" placeholder="Current PIN">
+    <label>New PIN (4 digits)</label><input id="sn" type="password" maxlength="4" placeholder="New PIN">
+    <div class="perr" id="serr"></div>
+    <div class="mrow" style="margin-top:8px">
+      <button class="mbtn mbtn-no" onclick="closeSet()">Close</button>
+      <button class="mbtn mbtn-ok" onclick="savePin()">Save PIN</button>
+    </div>
+    <div class="danger-zone">
+      <button class="mbtn mbtn-del" style="width:100%" onclick="resetAll()">Reset all completed chores</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// Color theme per person
+const THEME = {
+  Amelia: { color:'var(--amelia)', light:'var(--amelia-light)', mid:'var(--amelia-mid)', border:'var(--amelia-border)' },
+  Lucas:  { color:'var(--lucas)',  light:'var(--lucas-light)',  mid:'var(--lucas-mid)',  border:'var(--lucas-border)'  },
+  Taylor: { color:'var(--taylor)', light:'var(--taylor-light)', mid:'var(--taylor-mid)', border:'var(--taylor-border)' },
+  Kara:   { color:'var(--kara)',   light:'var(--kara-light)',   mid:'var(--kara-mid)',   border:'var(--kara-border)'   },
+  Shared: { color:'var(--shared)', light:'var(--shared-light)', mid:'var(--shared-mid)', border:'var(--shared-border)' },
+  Open:   { color:'var(--open)',   light:'var(--open-light)',   mid:'var(--open-mid)',   border:'var(--open-border)'   },
+};
+
+// For "Both" chores: who are the two kids
+const BOTH_KIDS = ['Amelia', 'Lucas'];
+
+// Default chore data
+// For "Both" chores, we store who:'Both' and doneBy:[] (array of names who've done it)
+// For single-person chores: who:'Name', done:bool
+const DEFAULTS = {
+  daily: [
+    { id:'fd', name:'Feed & let dogs out',       who:'Both',   doneBy:[] },
+    { id:'ed', name:'Empty dishwasher',          who:'Both',   doneBy:[] },
+    { id:'sk', name:'Sweep under kitchen table', who:'Both',   doneBy:[] },
+    { id:'tr', name:'Tidy room',                 who:'Both',   doneBy:[] },
+    { id:'wt', name:'Wipe off table',            who:'Both',   doneBy:[] },
+  ],
+  weekly: [
+    { id:'wl', name:'Laundry',              who:'Both',   doneBy:[], day:'Monday'    },
+    { id:'wd', name:'Dishes',               who:'Both',   doneBy:[], day:'Tuesday'   },
+    { id:'wp', name:'Pick up sticks/weeds', who:'Both',   doneBy:[], day:'Wednesday' },
+    { id:'wv', name:'Vacuum upstairs',      who:'Both',   doneBy:[], day:'Thursday'  },
+    { id:'wb', name:'Clean bathroom',       who:'Both',   doneBy:[], day:'Friday'    },
+    { id:'wc', name:'Clean out car',        who:'Both',   doneBy:[], day:'Saturday'  },
+    { id:'tt', name:'Take out trash',       who:'Taylor', done:false, day:'Wednesday' },
+    { id:'kb', name:'Clean our bathroom',   who:'Shared', done:false, day:'Saturday'  },
+  ],
+  paid: [
+    { id:'pv', name:'Vacuum main level',          who:'Open', pay:'$1',          done:false },
+    { id:'pb', name:'Book report',                who:'Open', pay:'$5',          done:false },
+    { id:'pw', name:'Clean windows - main level', who:'Open', pay:'$2 per kid',  done:false },
+    { id:'pm', name:'Mop main level',             who:'Open', pay:'$2',          done:false },
+    { id:'pd', name:'Dusting',                    who:'Open', pay:'$1 per level',done:false },
+    { id:'ps', name:'Swiffer main level',         who:'Open', pay:'$1',          done:false },
+    { id:'pg', name:'Wash the dogs',              who:'Open', pay:'$2 per dog',  done:false },
+  ],
+};
+
+let S = load();
+let pinBuf = '', delTarget = null, addCol = null;
+
+function load() {
+  try {
+    const raw = localStorage.getItem('familychores_v5');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { chores: JSON.parse(JSON.stringify(DEFAULTS)), pin: '1234' };
+}
+function save() {
+  try { localStorage.setItem('familychores_v5', JSON.stringify(S)); } catch(e) {}
+}
+
+// ── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  document.getElementById('hdate').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  renderList('daily');
+  renderWeekly();
+  renderList('paid');
+}
+
+function renderList(type) {
+  const el = document.getElementById('list-' + type);
+  el.innerHTML = '';
+  const list = S.chores[type];
+  if (!list || !list.length) { el.innerHTML = '<div class="empty">No chores yet — add one below</div>'; return; }
+  list.forEach(c => el.appendChild(makeChore(c, type)));
+}
+
+function renderWeekly() {
+  const el = document.getElementById('list-weekly');
+  el.innerHTML = '';
+  const byDay = {};
+  DAYS.forEach(d => byDay[d] = []);
+  S.chores.weekly.forEach(c => { if (byDay[c.day]) byDay[c.day].push(c); });
+  let any = false;
+  DAYS.forEach(day => {
+    if (!byDay[day].length) return;
+    any = true;
+    const div = document.createElement('div');
+    div.className = 'day-div';
+    div.textContent = day;
+    el.appendChild(div);
+    byDay[day].forEach(c => el.appendChild(makeChore(c, 'weekly')));
+  });
+  if (!any) el.innerHTML = '<div class="empty">No weekly chores yet</div>';
+}
+
+function isAllDone(c) {
+  if (c.who === 'Both') return BOTH_KIDS.every(k => (c.doneBy||[]).includes(k));
+  return !!c.done;
+}
+
+function makeChore(c, type) {
+  const el = document.createElement('div');
+  const allDone = isAllDone(c);
+  el.className = 'chore' + (allDone ? ' all-done' : '');
+
+  // Determine primary theme color for the left border & background
+  let primaryWho = c.who === 'Both' ? 'Open' : c.who;
+  // For "Both" chores, use a neutral border; individual tags show colors
+  const t = c.who === 'Both' ? THEME.Open : (THEME[c.who] || THEME.Open);
+
+  el.style.background = c.who === 'Both' ? '#FAFAFA' : t.light;
+  el.style.borderLeftColor = c.who === 'Both' ? '#CBD5E1' : t.border;
+
+  // Build who tags
+  let whoHTML = '';
+  if (c.who === 'Both') {
+    BOTH_KIDS.forEach(kid => {
+      const kt = THEME[kid];
+      const done = (c.doneBy||[]).includes(kid);
+      whoHTML += `<span class="who-tag ${done ? 'done-tag' : ''}"
+        style="color:${kt.color};background:${kt.light};border-color:${kt.border}"
+        data-kid="${kid}" data-id="${c.id}" data-type="${type}">${kid}</span>`;
+    });
+  } else if (c.who === 'Shared') {
+    whoHTML = `<span class="who-tag ${allDone ? 'done-tag' : ''}"
+      style="color:var(--shared);background:var(--shared-light);border-color:var(--shared-border)">Taylor & Kara</span>`;
+  } else {
+    const wt = THEME[c.who] || THEME.Open;
+    const label = c.who === 'Open' ? 'Anyone' : c.who;
+    whoHTML = `<span class="who-tag ${allDone ? 'done-tag' : ''}"
+      style="color:${wt.color};background:${wt.light};border-color:${wt.border}">${label}</span>`;
+  }
+
+  const badge = type === 'paid'
+    ? `<div class="pay-tag" style="color:${t.color};border-color:${t.border};background:${t.light}">${c.pay||'$?'}</div>`
+    : '';
+
+  el.innerHTML = `
+    <div class="cbody">
+      <div class="cname">${c.name}</div>
+      <div class="cwho-row">${whoHTML}</div>
+    </div>${badge}`;
+
+  // Clicking individual kid tags on "Both" chores
+  if (c.who === 'Both') {
+    el.querySelectorAll('.who-tag').forEach(tag => {
+      tag.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleKid(c.id, type, tag.dataset.kid);
+      });
+    });
+    // clicking the chore body (not a tag) does nothing for "Both" chores
+  } else {
+    // single person — tap the whole row to toggle
+    el.addEventListener('click', () => toggleSingle(c.id, type));
+  }
+
+  // long-press / right-click to delete
+  let pressTimer;
+  el.addEventListener('touchstart', () => { pressTimer = setTimeout(() => openDel(c.id, type, c.name), 600); }, { passive: true });
+  el.addEventListener('touchend',   () => clearTimeout(pressTimer));
+  el.addEventListener('touchmove',  () => clearTimeout(pressTimer));
+  el.addEventListener('contextmenu', e => { e.preventDefault(); openDel(c.id, type, c.name); });
+
+  return el;
+}
+
+function toggleKid(id, type, kid) {
+  const c = S.chores[type].find(x => x.id === id);
+  if (!c) return;
+  if (!c.doneBy) c.doneBy = [];
+  if (c.doneBy.includes(kid)) {
+    c.doneBy = c.doneBy.filter(k => k !== kid);
+  } else {
+    c.doneBy.push(kid);
+  }
+  save(); render();
+}
+
+function toggleSingle(id, type) {
+  const c = S.chores[type].find(x => x.id === id);
+  if (c) { c.done = !c.done; save(); render(); }
+}
+
+// ── ADD ──────────────────────────────────────────────────────────────────────
+function openAdd(col) {
+  addCol = col;
+  const titles = { daily:'Add daily chore', weekly:'Add weekly chore', paid:'Add paid chore' };
+  const subs   = { daily:'Appears every day', weekly:'Pinned to a day of the week', paid:'Kids can earn money for this' };
+  document.getElementById('add-h').textContent = titles[col];
+  document.getElementById('add-p').textContent = subs[col];
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-pay').value  = '';
+  document.getElementById('add-day-w').style.display = col === 'weekly' ? '' : 'none';
+  document.getElementById('add-pay-w').style.display = col === 'paid'   ? '' : 'none';
+  document.getElementById('add-ov').style.display = 'flex';
+  setTimeout(() => document.getElementById('add-name').focus(), 100);
+}
+function closeAdd() { document.getElementById('add-ov').style.display = 'none'; }
+function saveChore() {
+  const name = document.getElementById('add-name').value.trim();
+  if (!name) return;
+  const who = document.getElementById('add-who').value;
+  const base = { id: 'c' + Date.now(), name };
+  if (addCol === 'weekly') base.day = document.getElementById('add-day').value;
+  if (addCol === 'paid')   base.pay = document.getElementById('add-pay').value || '$?';
+
+  if (who === 'Both') {
+    base.who = 'Both';
+    base.doneBy = [];
+  } else {
+    base.who = who;
+    base.done = false;
+  }
+  S.chores[addCol].push(base);
+  save(); render(); closeAdd();
+}
+
+// ── DELETE ───────────────────────────────────────────────────────────────────
+function openDel(id, type, name) {
+  delTarget = { id, type };
+  document.getElementById('del-lbl').textContent = '"' + name + '" will be permanently removed.';
+  document.getElementById('del-ov').style.display = 'flex';
+}
+function closeDel() { document.getElementById('del-ov').style.display = 'none'; delTarget = null; }
+function confirmDel() {
+  if (!delTarget) return;
+  S.chores[delTarget.type] = S.chores[delTarget.type].filter(c => c.id !== delTarget.id);
+  save(); render(); closeDel();
+}
+
+// ── PIN ──────────────────────────────────────────────────────────────────────
+function openPin() {
+  pinBuf = '';
+  document.getElementById('perr').textContent = '';
+  updateDots();
+  document.getElementById('pin-ov').style.display = 'flex';
+}
+function closePin() { document.getElementById('pin-ov').style.display = 'none'; pinBuf = ''; }
+function pk(k) {
+  if (k === 'back') { pinBuf = pinBuf.slice(0, -1); updateDots(); return; }
+  if (pinBuf.length >= 4) return;
+  pinBuf += k; updateDots();
+  if (pinBuf.length === 4) {
+    setTimeout(() => {
+      if (pinBuf === S.pin) { closePin(); openSet(); }
+      else {
+        document.getElementById('perr').textContent = 'Wrong PIN — try again';
+        pinBuf = ''; updateDots();
+      }
+    }, 150);
+  }
+}
+function updateDots() {
+  for (let i = 0; i < 4; i++)
+    document.getElementById('pd' + i).classList.toggle('on', i < pinBuf.length);
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+function openSet() {
+  document.getElementById('sc').value = '';
+  document.getElementById('sn').value = '';
+  document.getElementById('serr').textContent = '';
+  document.getElementById('set-ov').style.display = 'flex';
+}
+function closeSet() { document.getElementById('set-ov').style.display = 'none'; }
+function savePin() {
+  const cur = document.getElementById('sc').value;
+  const nw  = document.getElementById('sn').value;
+  if (cur !== S.pin)           { document.getElementById('serr').textContent = 'Current PIN is wrong'; return; }
+  if (!/^\d{4}$/.test(nw))    { document.getElementById('serr').textContent = 'PIN must be exactly 4 digits'; return; }
+  S.pin = nw; save();
+  document.getElementById('serr').textContent = '';
+  closeSet();
+}
+function resetAll() {
+  if (!confirm('Clear all completed chores? This cannot be undone.')) return;
+  ['daily','weekly','paid'].forEach(t => S.chores[t].forEach(c => {
+    if (c.who === 'Both') c.doneBy = [];
+    else c.done = false;
+  }));
+  save(); render(); closeSet();
+}
+
+// ── KEYBOARD ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('add-ov').style.display !== 'none') saveChore();
+  if (e.key === 'Escape') { closeAdd(); closeDel(); closePin(); closeSet(); }
+});
+
+render();
+</script>
+</body>
+</html>
