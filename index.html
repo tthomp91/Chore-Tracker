@@ -4,249 +4,590 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Family Chores">
-<title>Family Chores</title>
+<meta name="apple-mobile-web-app-title" content="Team Thompson">
+<title>Team Thompson</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  :root {
-    --amelia:        #EC4899;
-    --amelia-light:  #FDF2F8;
-    --amelia-mid:    #FBCFE8;
-    --amelia-border: #F9A8D4;
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --cream:    #FDF6EE;
+  --warm:     #F5EBD8;
+  --tan:      #E8D5B7;
+  --brown:    #8B6914;
+  --brown-d:  #5C4209;
 
-    --lucas:        #16A34A;
-    --lucas-light:  #F0FDF4;
-    --lucas-mid:    #BBF7D0;
-    --lucas-border: #86EFAC;
+  --amelia:        #EC4899;
+  --amelia-light:  #FDF2F8;
+  --amelia-mid:    #FBCFE8;
+  --amelia-border: #F9A8D4;
+  --lucas:         #16A34A;
+  --lucas-light:   #F0FDF4;
+  --lucas-mid:     #BBF7D0;
+  --lucas-border:  #86EFAC;
+  --taylor:        #2563EB;
+  --taylor-light:  #EFF6FF;
+  --taylor-mid:    #BFDBFE;
+  --taylor-border: #93C5FD;
+  --kara:          #9333EA;
+  --kara-light:    #FAF5FF;
+  --kara-mid:      #E9D5FF;
+  --kara-border:   #D8B4FE;
+  --shared:        #0891B2;
+  --shared-light:  #ECFEFF;
+  --shared-mid:    #A5F3FC;
+  --shared-border: #67E8F9;
+  --open:          #64748B;
+  --open-light:    #F8FAFC;
+  --open-mid:      #E2E8F0;
+  --open-border:   #CBD5E1;
 
-    --taylor:        #2563EB;
-    --taylor-light:  #EFF6FF;
-    --taylor-mid:    #BFDBFE;
-    --taylor-border: #93C5FD;
+  --meal-green:   #16A34A;
+  --meal-green-l: #F0FDF4;
+  --meal-green-b: #86EFAC;
+  --meal-orange:  #EA580C;
+  --meal-orange-l:#FFF7ED;
+  --meal-orange-b:#FED7AA;
 
-    --kara:        #9333EA;
-    --kara-light:  #FAF5FF;
-    --kara-mid:    #E9D5FF;
-    --kara-border: #D8B4FE;
+  --text:   #2C1810;
+  --muted:  #8B7355;
+  --border: #DDD0B8;
+  --card:   #FFFFFF;
+  --shadow: rgba(139,105,20,0.10);
+}
 
-    --shared:        #0891B2;
-    --shared-light:  #ECFEFF;
-    --shared-mid:    #A5F3FC;
-    --shared-border: #67E8F9;
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Nunito Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+}
 
-    --open:        #64748B;
-    --open-light:  #F8FAFC;
-    --open-mid:    #E2E8F0;
-    --open-border: #CBD5E1;
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--warm);
+  border-right: 2px solid var(--tan);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0 20px;
+  box-shadow: 2px 0 12px var(--shadow);
+}
+.sidebar-brand {
+  padding: 0 20px 24px;
+  border-bottom: 1.5px solid var(--tan);
+  margin-bottom: 16px;
+}
+.sidebar-brand-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--brown-d);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+.sidebar-brand-sub {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 3px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--muted);
+  transition: all .15s;
+  border-left: 3px solid transparent;
+  font-family: 'Nunito', sans-serif;
+  user-select: none;
+}
+.nav-item:hover { background: var(--tan); color: var(--brown-d); }
+.nav-item.active {
+  background: var(--cream);
+  color: var(--brown-d);
+  border-left-color: var(--brown);
+}
+.nav-icon { font-size: 20px; width: 26px; text-align: center; }
+.nav-coming {
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 20px; background: var(--tan); color: var(--muted);
+  margin-left: auto;
+}
 
-    --bg:       #F1F5F9;
-    --col-bg:   #FFFFFF;
-    --col-head: #F8FAFC;
-    --text:     #0F172A;
-    --muted:    #64748B;
-    --border:   #E2E8F0;
-  }
-  html, body { height: 100%; overflow: hidden; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-    background: var(--bg); color: var(--text);
-    display: flex; flex-direction: column; height: 100vh;
-  }
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px 0;
+  border-top: 1.5px solid var(--tan);
+}
+.sidebar-date {
+  font-size: 12px; color: var(--muted); font-weight: 600; line-height: 1.5;
+}
 
-  /* HEADER */
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 20px 8px; flex-shrink: 0;
-  }
-  .header-title { font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: var(--text); }
-  .header-date  { font-size: 14px; color: var(--muted); margin-top: 2px; }
-  .hbtn {
-    background: #fff; border: 1px solid var(--border);
-    border-radius: 10px; padding: 7px 16px; font-size: 13px; font-weight: 600;
-    cursor: pointer; color: var(--muted); font-family: inherit; transition: all .15s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  }
-  .hbtn:hover { color: var(--text); border-color: #cbd5e1; }
+/* ── MAIN CONTENT ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+.page-view {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+.page-view.active { display: flex; }
 
-  /* LEGEND */
-  .legend { display: flex; gap: 6px; padding: 0 20px 10px; flex-shrink: 0; flex-wrap: wrap; }
-  .pill {
-    display: flex; align-items: center; gap: 5px;
-    padding: 4px 11px 4px 7px; border-radius: 20px; font-size: 12px; font-weight: 700;
-    border: 1px solid;
-  }
-  .pdot { width: 7px; height: 7px; border-radius: 50%; }
+/* PAGE HEADER */
+.page-header {
+  background: var(--card);
+  border-bottom: 1.5px solid var(--border);
+  padding: 18px 24px 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.page-header-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  color: var(--text);
+}
+.page-header-sub { font-size: 13px; color: var(--muted); margin-top: 2px; font-weight: 600; }
 
-  /* COLUMNS */
-  .cols {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px; padding: 0 10px 10px; flex: 1; min-height: 0;
-  }
-  .col {
-    background: var(--col-bg); border-radius: 20px;
-    display: flex; flex-direction: column; overflow: hidden; min-height: 0;
-    border: 1px solid var(--border);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .col-head {
-    background: var(--col-head); padding: 13px 16px 11px;
-    flex-shrink: 0; border-bottom: 1px solid var(--border);
-  }
-  .col-head-title { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
-  .col-head-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+/* SCROLL AREA */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tan) transparent;
+}
+.scroll-area::-webkit-scrollbar { width: 5px; }
+.scroll-area::-webkit-scrollbar-thumb { background: var(--tan); border-radius: 3px; }
 
-  .chore-list {
-    flex: 1; overflow-y: auto; padding: 7px 7px 4px;
-    display: flex; flex-direction: column; gap: 5px;
-    scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  }
-  .chore-list::-webkit-scrollbar { display: none; }
+/* ── CHORES ── */
+.chores-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+.chore-col {
+  background: var(--card);
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 2px 8px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.chore-col-head {
+  background: var(--warm);
+  padding: 12px 16px 10px;
+  border-bottom: 1.5px solid var(--border);
+}
+.chore-col-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--brown-d);
+}
+.chore-col-sub { font-size: 11px; color: var(--muted); font-weight: 600; margin-top: 1px; }
+.chore-list-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 6px 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  scrollbar-width: none;
+}
+.chore-list-inner::-webkit-scrollbar { display: none; }
+.chore-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: transform .1s, opacity .2s;
+  user-select: none;
+}
+.chore-row:active { transform: scale(0.98); }
+.chore-row.all-done { opacity: 0.3; }
+.chore-body { flex: 1; min-width: 0; }
+.chore-name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+.chore-row.all-done .chore-name { text-decoration: line-through; color: var(--muted); }
+.cwho-row { display: flex; gap: 3px; margin-top: 4px; flex-wrap: wrap; }
+.who-tag {
+  font-size: 22px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.who-tag.done-tag { opacity: 0.35; text-decoration: line-through; }
+.pay-tag {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1px solid;
+}
+.chore-col-footer { padding: 5px 6px 6px; flex-shrink: 0; }
+.add-chore-btn {
+  width: 100%;
+  padding: 7px;
+  border-radius: 9px;
+  border: 1.5px dashed var(--border);
+  background: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.add-chore-btn:hover { border-color: var(--brown); color: var(--brown); }
+.chore-empty { padding: 14px 6px; text-align: center; color: var(--muted); font-size: 12px; }
 
-  .day-div {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.2px; color: var(--muted); padding: 6px 6px 2px;
-  }
+/* LEGEND */
+.legend-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.legend-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px 4px 7px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid;
+}
+.ldot { width: 7px; height: 7px; border-radius: 50%; }
 
-  /* CHORE ROW */
-  .chore {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border-radius: 12px;
-    cursor: pointer; border-left: 4px solid transparent;
-    transition: transform .1s, opacity .2s;
-    user-select: none;
-  }
-  .chore:active { transform: scale(0.98); }
-  .chore.all-done { opacity: 0.3; }
+/* HBTN */
+.hbtn {
+  background: var(--warm);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: inherit;
+  transition: all .15s;
+}
+.hbtn:hover { color: var(--brown-d); border-color: var(--brown); }
 
-  .cbody { flex: 1; min-width: 0; }
-  .cname {
-    font-size: 14px; font-weight: 700; line-height: 1.2;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    color: var(--text);
-  }
-  .chore.all-done .cname { text-decoration: line-through; color: var(--muted); }
+/* ── MEALS ── */
+.meal-tab-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.meal-tab {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  transition: all .15s;
+  font-family: inherit;
+}
+.meal-tab.active { background: var(--meal-green); color: #fff; border-color: var(--meal-green); }
+.meal-page { display: none; }
+.meal-page.active { display: block; }
 
-  /* WHO TAGS row */
-  .cwho-row {
-    display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap;
-  }
-  .who-tag {
-    font-size: 22px; font-weight: 700;
-    padding: 8px 18px; border-radius: 20px; border: 1.5px solid;
-    cursor: pointer; transition: all .15s; white-space: nowrap;
-  }
-  .who-tag.done-tag {
-    opacity: 0.35;
-    text-decoration: line-through;
-  }
+.cuisine-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+.c-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  transition: all .15s;
+  font-family: inherit;
+}
+.c-pill.on { background: var(--meal-orange); color: #fff; border-color: var(--meal-orange); }
+.suggest-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: var(--meal-green);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity .15s;
+  margin-bottom: 18px;
+}
+.suggest-btn:hover { opacity: 0.88; }
+.suggest-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .pay-tag {
-    font-size: 12px; font-weight: 800;
-    padding: 3px 9px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;
-    border: 1px solid;
-  }
+.meal-grid { display: flex; flex-direction: column; gap: 12px; }
+.meal-card {
+  background: var(--card);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.meal-img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.meal-img-ph { width: 100%; height: 160px; background: linear-gradient(135deg,#f0fdf4,#dcfce7); display: flex; align-items: center; justify-content: center; font-size: 42px; }
+.meal-body { padding: 12px 14px; }
+.meal-name { font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 900; margin-bottom: 4px; letter-spacing: -0.2px; }
+.meal-meta { font-size: 12px; color: var(--muted); display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.meal-actions { display: flex; gap: 8px; }
+.btn-add {
+  flex: 1; padding: 9px; border-radius: 9px; border: none;
+  background: var(--meal-green); color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.btn-add:hover { opacity: 0.85; }
+.btn-add.added { background: var(--meal-green-b); color: var(--meal-green); }
+.btn-recipe {
+  padding: 9px 14px; border-radius: 9px; border: 1.5px solid var(--border);
+  background: var(--card); color: var(--muted); font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.btn-recipe:hover { color: var(--text); }
 
-  .col-footer { padding: 5px 7px 7px; flex-shrink: 0; }
-  .add-btn {
-    width: 100%; padding: 8px; border-radius: 10px;
-    border: 1.5px dashed #cbd5e1; background: none; color: var(--muted);
-    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
-    transition: all .15s;
-  }
-  .add-btn:hover { border-color: #94a3b8; color: var(--text); }
-  .empty { padding: 16px 6px; text-align: center; color: var(--muted); font-size: 13px; }
+.plan-day { background: var(--card); border-radius: 12px; border: 1.5px solid var(--border); margin-bottom: 10px; overflow: hidden; box-shadow: 0 1px 4px var(--shadow); }
+.plan-day-head { padding: 10px 14px; background: var(--meal-green-l); border-bottom: 1px solid var(--meal-green-b); display: flex; align-items: center; justify-content: space-between; }
+.plan-day-name { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 900; color: var(--meal-green); }
+.plan-meal-row { padding: 11px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.plan-meal-row:last-child { border-bottom: none; }
+.plan-meal-name { flex: 1; font-size: 14px; font-weight: 600; }
+.btn-remove { padding: 5px 10px; border-radius: 7px; border: 1px solid #fee2e2; background: #fef2f2; color: #dc2626; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
 
-  /* MODALS */
-  .overlay {
-    position: fixed; inset: 0; background: rgba(15,23,42,0.45);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 200; padding: 20px;
-  }
-  .modal {
-    background: #fff; border-radius: 22px; padding: 26px;
-    width: 100%; max-width: 360px; border: 1px solid var(--border);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  }
-  .modal h2  { font-size: 19px; font-weight: 800; margin-bottom: 5px; color: var(--text); }
-  .modal p   { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  .modal label {
-    font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.6px; color: var(--muted); display: block; margin-bottom: 5px;
-  }
-  .modal input, .modal select {
-    width: 100%; padding: 11px 13px; border: 1.5px solid var(--border);
-    border-radius: 11px; font-size: 14px; margin-bottom: 12px;
-    background: var(--bg); color: var(--text); outline: none; font-family: inherit;
-  }
-  .modal input:focus, .modal select:focus { border-color: #94a3b8; }
-  .mrow { display: flex; gap: 10px; margin-top: 4px; }
-  .mbtn {
-    flex: 1; padding: 12px; border-radius: 11px; font-size: 14px;
-    font-weight: 700; cursor: pointer; font-family: inherit; border: none; transition: opacity .15s;
-  }
-  .mbtn-ok  { background: var(--text); color: #fff; }
-  .mbtn-ok:hover  { opacity: 0.85; }
-  .mbtn-no  { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
-  .mbtn-no:hover  { color: var(--text); }
-  .mbtn-del { background: #DC2626; color: #fff; }
+.grocery-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--card); border-radius: 9px; margin-bottom: 5px; border: 1.5px solid var(--border); cursor: pointer; transition: all .15s; }
+.grocery-item.checked { opacity: 0.4; }
+.grocery-item.checked .gi-name { text-decoration: line-through; }
+.gi-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.grocery-item.checked .gi-check { background: var(--meal-green); border-color: var(--meal-green); color: #fff; font-size: 12px; }
+.gi-name { font-size: 14px; font-weight: 600; flex: 1; }
+.gi-amount { font-size: 12px; color: var(--muted); }
+.grocery-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin: 14px 0 6px 2px; }
+.empty-state { padding: 40px 20px; text-align: center; color: var(--muted); font-size: 14px; font-weight: 600; line-height: 1.6; }
+.grocery-progress { font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+.clear-btn { width: 100%; padding: 11px; border-radius: 11px; border: 1.5px solid #fee2e2; background: #fef2f2; color: #dc2626; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 14px; }
 
-  /* PIN PAD */
-  .pin-dots { display: flex; justify-content: center; gap: 14px; margin: 16px 0 20px; }
-  .pdot2 {
-    width: 15px; height: 15px; border-radius: 50%;
-    border: 2px solid #cbd5e1; background: transparent; transition: all .15s;
-  }
-  .pdot2.on { background: var(--text); border-color: var(--text); }
-  .pin-pad  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-  .pkey {
-    padding: 15px; border-radius: 13px; background: var(--bg); border: 1px solid var(--border);
-    font-size: 20px; font-weight: 700; color: var(--text);
-    cursor: pointer; transition: background .12s; font-family: inherit;
-  }
-  .pkey:hover { background: #e2e8f0; }
-  .perr { color: #DC2626; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; }
+/* ── COMING SOON ── */
+.coming-soon {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: var(--muted); text-align: center; padding: 40px;
+}
+.coming-soon-icon { font-size: 56px; margin-bottom: 16px; }
+.coming-soon h2 { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: var(--brown-d); margin-bottom: 8px; }
+.coming-soon p { font-size: 14px; font-weight: 600; line-height: 1.6; }
 
-  .danger-zone { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+/* ── MODALS ── */
+.overlay {
+  position: fixed; inset: 0; background: rgba(44,24,16,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 300; padding: 20px;
+}
+.modal {
+  background: var(--card); border-radius: 20px; padding: 24px;
+  width: 100%; max-width: 360px;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.modal h2 { font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 900; margin-bottom: 4px; }
+.modal p { font-size: 13px; color: var(--muted); margin-bottom: 14px; font-weight: 600; }
+.modal label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); display: block; margin-bottom: 4px; }
+.modal input, .modal select {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 14px; margin-bottom: 10px;
+  background: var(--cream); color: var(--text); outline: none; font-family: inherit;
+}
+.modal input:focus, .modal select:focus { border-color: var(--brown); }
+.mrow { display: flex; gap: 8px; margin-top: 4px; }
+.mbtn { flex: 1; padding: 11px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; border: none; transition: opacity .15s; }
+.mbtn-ok  { background: var(--brown-d); color: #fff; }
+.mbtn-ok:hover { opacity: 0.85; }
+.mbtn-no  { background: var(--warm); color: var(--muted); border: 1.5px solid var(--border); }
+.mbtn-del { background: #DC2626; color: #fff; }
+
+.pin-dots { display: flex; justify-content: center; gap: 14px; margin: 14px 0 18px; }
+.pdot2 { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all .15s; }
+.pdot2.on { background: var(--brown-d); border-color: var(--brown-d); }
+.pin-pad { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.pkey { padding: 14px; border-radius: 12px; background: var(--warm); border: 1.5px solid var(--border); font-size: 20px; font-weight: 700; color: var(--text); cursor: pointer; transition: background .12s; font-family: inherit; }
+.pkey:hover { background: var(--tan); }
+.perr { color: #DC2626; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; font-weight: 600; }
+.danger-zone { margin-top: 14px; padding-top: 14px; border-top: 1.5px solid var(--border); }
+
+/* recipe sheet */
+.recipe-overlay { position: fixed; inset: 0; background: rgba(44,24,16,0.5); display: flex; align-items: flex-end; justify-content: center; z-index: 400; }
+.recipe-sheet { background: #fff; border-radius: 24px 24px 0 0; width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto; padding: 24px 20px 40px; box-shadow: 0 -8px 40px rgba(0,0,0,0.15); }
+.recipe-sheet h2 { font-family: 'Nunito', sans-serif; font-size: 21px; font-weight: 900; margin-bottom: 6px; }
+.recipe-meta { font-size: 13px; color: var(--muted); margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; font-weight: 600; }
+.recipe-section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin: 14px 0 7px; }
+.recipe-ing { padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.recipe-ing:last-child { border-bottom: none; }
+.recipe-step { display: flex; gap: 10px; margin-bottom: 11px; }
+.step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--meal-green); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-txt { font-size: 14px; line-height: 1.6; flex: 1; }
+.close-btn { width: 100%; padding: 12px; border-radius: 11px; border: 1.5px solid var(--border); background: var(--cream); color: var(--muted); font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 18px; }
+.spinner-wrap { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; font-weight: 600; }
+.spinner { display: inline-block; width: 26px; height: 26px; border: 3px solid var(--border); border-top-color: var(--meal-green); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <div class="header-title">Family Chores</div>
-    <div class="header-date" id="hdate"></div>
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-name">Team<br>Thompson</div>
+    <div class="sidebar-brand-sub">Family HQ</div>
   </div>
-  <button class="hbtn" onclick="openPin()">⚙ Settings</button>
+  <div class="nav-item active" onclick="showPage('chores')" id="nav-chores">
+    <span class="nav-icon">🧹</span> Chores
+  </div>
+  <div class="nav-item" onclick="showPage('meals')" id="nav-meals">
+    <span class="nav-icon">🍽️</span> Meals
+  </div>
+  <div class="nav-item" onclick="showPage('calendar')" id="nav-calendar">
+    <span class="nav-icon">📅</span> Calendar
+    <span class="nav-coming">Soon</span>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-date" id="sidebar-date"></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CHORES PAGE -->
+  <div class="page-view active" id="page-chores">
+    <div class="page-header">
+      <div>
+        <div class="page-header-title">Chores</div>
+        <div class="page-header-sub" id="chore-header-sub">Loading...</div>
+      </div>
+      <button class="hbtn" onclick="openPin()">⚙ Settings</button>
+    </div>
+    <div class="scroll-area">
+      <div class="legend-row">
+        <div class="legend-pill" style="background:var(--amelia-light);color:var(--amelia);border-color:var(--amelia-border)"><div class="ldot" style="background:var(--amelia)"></div>Amelia</div>
+        <div class="legend-pill" style="background:var(--lucas-light);color:var(--lucas);border-color:var(--lucas-border)"><div class="ldot" style="background:var(--lucas)"></div>Lucas</div>
+        <div class="legend-pill" style="background:var(--taylor-light);color:var(--taylor);border-color:var(--taylor-border)"><div class="ldot" style="background:var(--taylor)"></div>Taylor</div>
+        <div class="legend-pill" style="background:var(--kara-light);color:var(--kara);border-color:var(--kara-border)"><div class="ldot" style="background:var(--kara)"></div>Kara</div>
+        <div class="legend-pill" style="background:var(--shared-light);color:var(--shared);border-color:var(--shared-border)"><div class="ldot" style="background:var(--shared)"></div>Taylor & Kara</div>
+      </div>
+      <div class="chores-cols">
+        <div class="chore-col">
+          <div class="chore-col-head"><div class="chore-col-title">Daily</div><div class="chore-col-sub">Every day</div></div>
+          <div class="chore-list-inner" id="list-daily"></div>
+          <div class="chore-col-footer"><button class="add-chore-btn" onclick="openAdd('daily')">+ Add daily chore</button></div>
+        </div>
+        <div class="chore-col">
+          <div class="chore-col-head"><div class="chore-col-title">Weekly</div><div class="chore-col-sub">Every week</div></div>
+          <div class="chore-list-inner" id="list-weekly"></div>
+          <div class="chore-col-footer"><button class="add-chore-btn" onclick="openAdd('weekly')">+ Add weekly chore</button></div>
+        </div>
+        <div class="chore-col">
+          <div class="chore-col-head"><div class="chore-col-title">Bonus / Paid</div><div class="chore-col-sub">Earn extra cash</div></div>
+          <div class="chore-list-inner" id="list-paid"></div>
+          <div class="chore-col-footer"><button class="add-chore-btn" onclick="openAdd('paid')">+ Add paid chore</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEALS PAGE -->
+  <div class="page-view" id="page-meals">
+    <div class="page-header">
+      <div>
+        <div class="page-header-title">Meal Planner</div>
+        <div class="page-header-sub" id="meal-header-sub">Plan your week</div>
+      </div>
+    </div>
+    <div class="scroll-area">
+      <div class="meal-tab-row">
+        <button class="meal-tab active" onclick="showMealTab('suggest')">Suggest</button>
+        <button class="meal-tab" onclick="showMealTab('plan')">This Week</button>
+        <button class="meal-tab" onclick="showMealTab('grocery')">Grocery List</button>
+      </div>
+
+      <!-- Suggest -->
+      <div class="meal-page active" id="meal-suggest">
+        <div class="section-label">Cuisine type</div>
+        <div class="cuisine-row" id="cuisine-row"></div>
+        <button class="suggest-btn" id="suggest-btn" onclick="fetchSuggestions()">Find Meal Ideas</button>
+        <div class="meal-grid" id="meal-grid"></div>
+      </div>
+
+      <!-- Plan -->
+      <div class="meal-page" id="meal-plan">
+        <div id="plan-list"></div>
+      </div>
+
+      <!-- Grocery -->
+      <div class="meal-page" id="meal-grocery">
+        <div class="grocery-progress" id="grocery-progress"></div>
+        <div id="grocery-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR PAGE -->
+  <div class="page-view" id="page-calendar">
+    <div class="page-header">
+      <div><div class="page-header-title">Calendar</div><div class="page-header-sub">Important dates & events</div></div>
+    </div>
+    <div class="scroll-area">
+      <div class="coming-soon">
+        <div class="coming-soon-icon">📅</div>
+        <h2>Coming Soon</h2>
+        <p>The family calendar is on its way.<br>Check back soon!</p>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<div class="legend">
-  <div class="pill" style="background:var(--amelia-light);color:var(--amelia);border-color:var(--amelia-border)"><div class="pdot" style="background:var(--amelia)"></div>Amelia</div>
-  <div class="pill" style="background:var(--lucas-light);color:var(--lucas);border-color:var(--lucas-border)"><div class="pdot" style="background:var(--lucas)"></div>Lucas</div>
-  <div class="pill" style="background:var(--taylor-light);color:var(--taylor);border-color:var(--taylor-border)"><div class="pdot" style="background:var(--taylor)"></div>Taylor</div>
-  <div class="pill" style="background:var(--kara-light);color:var(--kara);border-color:var(--kara-border)"><div class="pdot" style="background:var(--kara)"></div>Kara</div>
-  <div class="pill" style="background:var(--shared-light);color:var(--shared);border-color:var(--shared-border)"><div class="pdot" style="background:var(--shared)"></div>Taylor & Kara</div>
-</div>
-
-<div class="cols">
-  <div class="col">
-    <div class="col-head"><div class="col-head-title">Daily</div><div class="col-head-sub">Every day</div></div>
-    <div class="chore-list" id="list-daily"></div>
-    <div class="col-footer"><button class="add-btn" onclick="openAdd('daily')">+ Add daily chore</button></div>
-  </div>
-  <div class="col">
-    <div class="col-head"><div class="col-head-title">Weekly</div><div class="col-head-sub">By day of the week</div></div>
-    <div class="chore-list" id="list-weekly"></div>
-    <div class="col-footer"><button class="add-btn" onclick="openAdd('weekly')">+ Add weekly chore</button></div>
-  </div>
-  <div class="col">
-    <div class="col-head"><div class="col-head-title">Bonus / Paid</div><div class="col-head-sub">Earn extra cash</div></div>
-    <div class="chore-list" id="list-paid"></div>
-    <div class="col-footer"><button class="add-btn" onclick="openAdd('paid')">+ Add paid chore</button></div>
-  </div>
-</div>
-
-<!-- ADD MODAL -->
+<!-- CHORE MODALS -->
 <div class="overlay" id="add-ov" style="display:none" onclick="if(event.target===this)closeAdd()">
   <div class="modal">
     <h2 id="add-h">Add chore</h2><p id="add-p"></p>
@@ -261,13 +602,6 @@
       <option value="Shared">Taylor & Kara (shared)</option>
       <option value="Open">Anyone (unassigned)</option>
     </select>
-    <div id="add-day-w">
-      <label>Day of week</label>
-      <select id="add-day">
-        <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-        <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
-      </select>
-    </div>
     <div id="add-pay-w" style="display:none">
       <label>Pay amount</label><input id="add-pay" placeholder="e.g. $2 per dog">
     </div>
@@ -277,8 +611,6 @@
     </div>
   </div>
 </div>
-
-<!-- DELETE MODAL -->
 <div class="overlay" id="del-ov" style="display:none" onclick="if(event.target===this)closeDel()">
   <div class="modal">
     <h2>Remove this chore?</h2><p id="del-lbl"></p>
@@ -288,8 +620,6 @@
     </div>
   </div>
 </div>
-
-<!-- PIN MODAL -->
 <div class="overlay" id="pin-ov" style="display:none" onclick="if(event.target===this)closePin()">
   <div class="modal">
     <h2>Enter PIN</h2><p>Default PIN is 1234</p>
@@ -298,15 +628,9 @@
       <div class="pdot2" id="pd2"></div><div class="pdot2" id="pd3"></div>
     </div>
     <div class="pin-pad">
-      <button class="pkey" onclick="pk('1')">1</button>
-      <button class="pkey" onclick="pk('2')">2</button>
-      <button class="pkey" onclick="pk('3')">3</button>
-      <button class="pkey" onclick="pk('4')">4</button>
-      <button class="pkey" onclick="pk('5')">5</button>
-      <button class="pkey" onclick="pk('6')">6</button>
-      <button class="pkey" onclick="pk('7')">7</button>
-      <button class="pkey" onclick="pk('8')">8</button>
-      <button class="pkey" onclick="pk('9')">9</button>
+      <button class="pkey" onclick="pk('1')">1</button><button class="pkey" onclick="pk('2')">2</button><button class="pkey" onclick="pk('3')">3</button>
+      <button class="pkey" onclick="pk('4')">4</button><button class="pkey" onclick="pk('5')">5</button><button class="pkey" onclick="pk('6')">6</button>
+      <button class="pkey" onclick="pk('7')">7</button><button class="pkey" onclick="pk('8')">8</button><button class="pkey" onclick="pk('9')">9</button>
       <button class="pkey" onclick="pk('back')" style="font-size:16px">⌫</button>
       <button class="pkey" onclick="pk('0')">0</button>
       <button class="pkey" onclick="closePin()" style="font-size:13px;color:var(--muted)">✕</button>
@@ -314,8 +638,6 @@
     <div class="perr" id="perr"></div>
   </div>
 </div>
-
-<!-- SETTINGS MODAL -->
 <div class="overlay" id="set-ov" style="display:none" onclick="if(event.target===this)closeSet()">
   <div class="modal">
     <h2>Settings</h2><p>Change your PIN or reset chores.</p>
@@ -332,9 +654,16 @@
   </div>
 </div>
 
+<!-- RECIPE SHEET -->
+<div class="recipe-overlay" id="recipe-ov" style="display:none" onclick="if(event.target===this)closeRecipe()">
+  <div class="recipe-sheet" id="recipe-sheet">
+    <div class="spinner-wrap"><div class="spinner"></div><br>Loading recipe...</div>
+  </div>
+</div>
+
 <script type="module">
-import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp }                                       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot }      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCe9zNmLpJj3oPUpNCpSTuHqZFHUvfVpiU",
@@ -344,352 +673,463 @@ const firebaseConfig = {
   messagingSenderId: "271324049535",
   appId: "1:271324049535:web:c002dc4e0c1772d95a0f4a"
 };
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+const REF   = doc(db, 'family', 'chores');
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-const REF = doc(db, 'family', 'chores');
+// ── DATE ────────────────────────────────────────────────────────────────────
+const DAYS_OF_WEEK = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+document.getElementById('sidebar-date').textContent =
+  new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
 
-const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-// Color theme per person
-const THEME = {
-  Amelia: { color:'var(--amelia)', light:'var(--amelia-light)', mid:'var(--amelia-mid)', border:'var(--amelia-border)' },
-  Lucas:  { color:'var(--lucas)',  light:'var(--lucas-light)',  mid:'var(--lucas-mid)',  border:'var(--lucas-border)'  },
-  Taylor: { color:'var(--taylor)', light:'var(--taylor-light)', mid:'var(--taylor-mid)', border:'var(--taylor-border)' },
-  Kara:   { color:'var(--kara)',   light:'var(--kara-light)',   mid:'var(--kara-mid)',   border:'var(--kara-border)'   },
-  Shared: { color:'var(--shared)', light:'var(--shared-light)', mid:'var(--shared-mid)', border:'var(--shared-border)' },
-  Open:   { color:'var(--open)',   light:'var(--open-light)',   mid:'var(--open-mid)',   border:'var(--open-border)'   },
+// ── NAV ──────────────────────────────────────────────────────────────────────
+window.showPage = function(name) {
+  ['chores','meals','calendar'].forEach(p => {
+    document.getElementById('page-' + p).classList.toggle('active', p === name);
+    document.getElementById('nav-' + p).classList.toggle('active', p === name);
+  });
+  if (name === 'meals') { renderMealPlan(); renderGrocery(); }
 };
 
-// For "Both" chores: who are the two kids
-const BOTH_KIDS = ['Amelia', 'Lucas'];
+// ── CHORE THEME ──────────────────────────────────────────────────────────────
+const THEME = {
+  Amelia: { color:'var(--amelia)', light:'var(--amelia-light)', border:'var(--amelia-border)' },
+  Lucas:  { color:'var(--lucas)',  light:'var(--lucas-light)',  border:'var(--lucas-border)'  },
+  Taylor: { color:'var(--taylor)', light:'var(--taylor-light)', border:'var(--taylor-border)' },
+  Kara:   { color:'var(--kara)',   light:'var(--kara-light)',   border:'var(--kara-border)'   },
+  Shared: { color:'var(--shared)', light:'var(--shared-light)', border:'var(--shared-border)' },
+  Open:   { color:'var(--open)',   light:'var(--open-light)',   border:'var(--open-border)'   },
+};
+const BOTH_KIDS = ['Amelia','Lucas'];
 
-// Default chore data
-// For "Both" chores, we store who:'Both' and doneBy:[] (array of names who've done it)
-// For single-person chores: who:'Name', done:bool
-const DEFAULTS = {
+const CHORE_DEFAULTS = {
   daily: [
-    { id:'fd', name:'Feed & let dogs out',       who:'Both',   doneBy:[] },
-    { id:'ed', name:'Empty dishwasher',          who:'Both',   doneBy:[] },
-    { id:'sk', name:'Sweep under kitchen table', who:'Both',   doneBy:[] },
-    { id:'tr', name:'Tidy room',                 who:'Both',   doneBy:[] },
-    { id:'wt', name:'Wipe off table',            who:'Both',   doneBy:[] },
+    { id:'fd', name:'Feed & let dogs out',       who:'Both', doneBy:[] },
+    { id:'ed', name:'Empty dishwasher',          who:'Both', doneBy:[] },
+    { id:'sk', name:'Sweep under kitchen table', who:'Both', doneBy:[] },
+    { id:'tr', name:'Tidy room',                 who:'Both', doneBy:[] },
+    { id:'wt', name:'Wipe off table',            who:'Both', doneBy:[] },
   ],
   weekly: [
-    { id:'wl', name:'Laundry',              who:'Both',   doneBy:[], day:'Monday'    },
-    { id:'wd', name:'Dishes',               who:'Both',   doneBy:[], day:'Tuesday'   },
-    { id:'wp', name:'Pick up sticks/weeds', who:'Both',   doneBy:[], day:'Wednesday' },
-    { id:'wv', name:'Vacuum upstairs',      who:'Both',   doneBy:[], day:'Thursday'  },
-    { id:'wb', name:'Clean bathroom',       who:'Both',   doneBy:[], day:'Friday'    },
-    { id:'wc', name:'Clean out car',        who:'Both',   doneBy:[], day:'Saturday'  },
-    { id:'tt', name:'Take out trash',       who:'Taylor', done:false, day:'Wednesday' },
-    { id:'kb', name:'Clean our bathroom',   who:'Shared', done:false, day:'Saturday'  },
+    { id:'wl', name:'Laundry',              who:'Both',   doneBy:[] },
+    { id:'wd', name:'Dishes',               who:'Both',   doneBy:[] },
+    { id:'wp', name:'Pick up sticks/weeds', who:'Both',   doneBy:[] },
+    { id:'wv', name:'Vacuum upstairs',      who:'Both',   doneBy:[] },
+    { id:'wb', name:'Clean bathroom',       who:'Both',   doneBy:[] },
+    { id:'wc', name:'Clean out car',        who:'Both',   doneBy:[] },
+    { id:'tt', name:'Take out trash',       who:'Taylor', done:false },
+    { id:'kb', name:'Clean our bathroom',   who:'Shared', done:false },
   ],
   paid: [
-    { id:'pv', name:'Vacuum main level',          who:'Open', pay:'$1',          done:false },
-    { id:'pb', name:'Book report',                who:'Open', pay:'$5',          done:false },
-    { id:'pw', name:'Clean windows - main level', who:'Open', pay:'$2 per kid',  done:false },
-    { id:'pm', name:'Mop main level',             who:'Open', pay:'$2',          done:false },
-    { id:'pd', name:'Dusting',                    who:'Open', pay:'$1 per level',done:false },
-    { id:'ps', name:'Swiffer main level',         who:'Open', pay:'$1',          done:false },
-    { id:'pg', name:'Wash the dogs',              who:'Open', pay:'$2 per dog',  done:false },
+    { id:'pv', name:'Vacuum main level',          who:'Open', pay:'$1',           done:false },
+    { id:'pb', name:'Book report',                who:'Open', pay:'$5',           done:false },
+    { id:'pw', name:'Clean windows - main level', who:'Open', pay:'$2 per kid',   done:false },
+    { id:'pm', name:'Mop main level',             who:'Open', pay:'$2',           done:false },
+    { id:'pd', name:'Dusting',                    who:'Open', pay:'$1 per level', done:false },
+    { id:'ps', name:'Swiffer main level',         who:'Open', pay:'$1',           done:false },
+    { id:'pg', name:'Wash the dogs',              who:'Open', pay:'$2 per dog',   done:false },
   ],
 };
 
-let S = { chores: JSON.parse(JSON.stringify(DEFAULTS)), pin: '1234', lastDailyReset: '', lastWeeklyReset: '' };
-let pinBuf = '', delTarget = null, addCol = null;
-let _ignoreNext = false; // prevent echo-loop on save
+let CS = { chores: JSON.parse(JSON.stringify(CHORE_DEFAULTS)), pin:'1234', lastDailyReset:'', lastWeeklyReset:'' };
+let pinBuf = '', delTarget = null, addCol = null, _ignoreNext = false;
 
-function lastSunday() {
-  const now = new Date();
-  const sun = new Date(now);
-  sun.setDate(now.getDate() - now.getDay());
-  return sun.toISOString().slice(0, 10);
-}
-function today() { return new Date().toISOString().slice(0, 10); }
+function todayStr()     { return new Date().toISOString().slice(0,10); }
+function lastSundayStr(){ const n=new Date(),s=new Date(n); s.setDate(n.getDate()-n.getDay()); return s.toISOString().slice(0,10); }
 
 function clearChores(types) {
-  types.forEach(t => S.chores[t] && S.chores[t].forEach(c => {
-    if (c.who === 'Both') c.doneBy = [];
-    else c.done = false;
+  types.forEach(t => CS.chores[t] && CS.chores[t].forEach(c => {
+    if (c.who==='Both') c.doneBy=[];
+    else c.done=false;
   }));
 }
-
-async function save() {
-  _ignoreNext = true;
-  try { await setDoc(REF, JSON.parse(JSON.stringify(S))); } catch(e) { console.error('Save failed', e); }
-}
-
 function checkAutoReset() {
-  const todayStr = today();
-  const sunStr   = lastSunday();
-  let dirty = false;
-  if (S.lastDailyReset !== todayStr) {
-    clearChores(['daily']);
-    S.lastDailyReset = todayStr;
-    dirty = true;
-  }
-  if (S.lastWeeklyReset !== sunStr) {
-    clearChores(['weekly', 'paid']);
-    S.lastWeeklyReset = sunStr;
-    dirty = true;
-  }
+  let dirty=false;
+  if (CS.lastDailyReset !== todayStr())     { clearChores(['daily']);           CS.lastDailyReset=todayStr();     dirty=true; }
+  if (CS.lastWeeklyReset !== lastSundayStr()){ clearChores(['weekly','paid']); CS.lastWeeklyReset=lastSundayStr(); dirty=true; }
   return dirty;
 }
+async function saveChores() {
+  _ignoreNext=true;
+  try { await setDoc(REF, JSON.parse(JSON.stringify(CS))); } catch(e){ console.error(e); }
+}
 
-// Show a loading state while we fetch from Firestore
-document.getElementById('list-daily').innerHTML   = '<div class="empty">Loading...</div>';
-document.getElementById('list-weekly').innerHTML  = '<div class="empty">Loading...</div>';
-document.getElementById('list-paid').innerHTML    = '<div class="empty">Loading...</div>';
-
-// Boot: fetch once, apply resets if needed, then subscribe to live updates
+// Boot Firebase
 (async () => {
   try {
     const snap = await getDoc(REF);
     if (snap.exists()) {
-      S = snap.data();
-      // Make sure arrays exist on old data
-      ['daily','weekly','paid'].forEach(t => { if (!S.chores[t]) S.chores[t] = []; });
+      CS = snap.data();
+      ['daily','weekly','paid'].forEach(t => { if (!CS.chores[t]) CS.chores[t]=[]; });
     } else {
-      // First time ever -- seed with defaults and save to Firebase
-      S = { chores: JSON.parse(JSON.stringify(DEFAULTS)), pin: '1234', lastDailyReset: today(), lastWeeklyReset: lastSunday() };
-      await save();
+      CS = { chores: JSON.parse(JSON.stringify(CHORE_DEFAULTS)), pin:'1234', lastDailyReset: todayStr(), lastWeeklyReset: lastSundayStr() };
+      await saveChores();
     }
-    const dirty = checkAutoReset();
-    if (dirty) await save();
-    render();
-
-    // Live listener — updates all devices in real time
+    if (checkAutoReset()) await saveChores();
+    renderChores();
     onSnapshot(REF, snap => {
-      if (_ignoreNext) { _ignoreNext = false; return; }
-      if (snap.exists()) { S = snap.data(); render(); }
+      if (_ignoreNext) { _ignoreNext=false; return; }
+      if (snap.exists()) { CS=snap.data(); renderChores(); }
     });
-  } catch(e) {
-    console.error('Firebase error', e);
-    // Fall back to defaults so app still works offline
-    checkAutoReset();
-    render();
-  }
+  } catch(e) { console.error(e); checkAutoReset(); renderChores(); }
 })();
 
-// ── RENDER ──────────────────────────────────────────────────────────────────
-function render() {
-  document.getElementById('hdate').textContent =
-    new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-  renderList('daily');
-  renderWeekly();
-  renderList('paid');
+// ── RENDER CHORES ────────────────────────────────────────────────────────────
+function renderChores() {
+  renderChoreList('daily');
+  renderChoreList('weekly');
+  renderChoreList('paid');
+  const total = CS.chores.daily.length + CS.chores.weekly.length + CS.chores.paid.length;
+  const done  = CS.chores.daily.filter(isAllDone).length + CS.chores.weekly.filter(isAllDone).length + CS.chores.paid.filter(isAllDone).length;
+  document.getElementById('chore-header-sub').textContent = `${done} of ${total} done today`;
 }
-
-function renderList(type) {
+function renderChoreList(type) {
   const el = document.getElementById('list-' + type);
   el.innerHTML = '';
-  const list = S.chores[type];
-  if (!list || !list.length) { el.innerHTML = '<div class="empty">No chores yet — add one below</div>'; return; }
-  list.forEach(c => el.appendChild(makeChore(c, type)));
+  const list = CS.chores[type];
+  if (!list||!list.length) { el.innerHTML='<div class="chore-empty">No chores yet</div>'; return; }
+  list.forEach(c => el.appendChild(makeChoreRow(c, type)));
 }
-
-function renderWeekly() {
-  const el = document.getElementById('list-weekly');
-  el.innerHTML = '';
-  const list = S.chores.weekly;
-  if (!list || !list.length) { el.innerHTML = '<div class="empty">No weekly chores yet</div>'; return; }
-  list.forEach(c => el.appendChild(makeChore(c, 'weekly')));
-}
-
 function isAllDone(c) {
-  if (c.who === 'Both') return BOTH_KIDS.every(k => (c.doneBy||[]).includes(k));
-  return !!c.done;
+  return c.who==='Both' ? BOTH_KIDS.every(k=>(c.doneBy||[]).includes(k)) : !!c.done;
 }
-
-function makeChore(c, type) {
+function makeChoreRow(c, type) {
   const el = document.createElement('div');
   const allDone = isAllDone(c);
-  el.className = 'chore' + (allDone ? ' all-done' : '');
+  el.className = 'chore-row' + (allDone?' all-done':'');
+  const t = c.who==='Both' ? THEME.Open : (THEME[c.who]||THEME.Open);
+  el.style.background = c.who==='Both' ? '#FAFAF8' : t.light;
+  el.style.borderLeftColor = c.who==='Both' ? 'var(--border)' : t.border;
 
-  // Determine primary theme color for the left border & background
-  let primaryWho = c.who === 'Both' ? 'Open' : c.who;
-  // For "Both" chores, use a neutral border; individual tags show colors
-  const t = c.who === 'Both' ? THEME.Open : (THEME[c.who] || THEME.Open);
-
-  el.style.background = c.who === 'Both' ? '#FAFAFA' : t.light;
-  el.style.borderLeftColor = c.who === 'Both' ? '#CBD5E1' : t.border;
-
-  // Build who tags
-  let whoHTML = '';
-  if (c.who === 'Both') {
+  let whoHTML='';
+  if (c.who==='Both') {
     BOTH_KIDS.forEach(kid => {
-      const kt = THEME[kid];
-      const done = (c.doneBy||[]).includes(kid);
-      whoHTML += `<span class="who-tag ${done ? 'done-tag' : ''}"
-        style="color:${kt.color};background:${kt.light};border-color:${kt.border}"
-        data-kid="${kid}" data-id="${c.id}" data-type="${type}">${kid}</span>`;
+      const kt=THEME[kid], done=(c.doneBy||[]).includes(kid);
+      whoHTML+=`<span class="who-tag ${done?'done-tag':''}" style="color:${kt.color};background:${kt.light};border-color:${kt.border}" data-kid="${kid}">${kid}</span>`;
     });
-  } else if (c.who === 'Shared') {
-    whoHTML = `<span class="who-tag ${allDone ? 'done-tag' : ''}"
-      style="color:var(--shared);background:var(--shared-light);border-color:var(--shared-border)">Taylor & Kara</span>`;
+  } else if (c.who==='Shared') {
+    whoHTML=`<span class="who-tag ${allDone?'done-tag':''}" style="color:var(--shared);background:var(--shared-light);border-color:var(--shared-border)">Taylor & Kara</span>`;
   } else {
-    const wt = THEME[c.who] || THEME.Open;
-    const label = c.who === 'Open' ? 'Anyone' : c.who;
-    whoHTML = `<span class="who-tag ${allDone ? 'done-tag' : ''}"
-      style="color:${wt.color};background:${wt.light};border-color:${wt.border}">${label}</span>`;
+    const wt=THEME[c.who]||THEME.Open;
+    whoHTML=`<span class="who-tag ${allDone?'done-tag':''}" style="color:${wt.color};background:${wt.light};border-color:${wt.border}">${c.who==='Open'?'Anyone':c.who}</span>`;
   }
 
-  const badge = type === 'paid'
-    ? `<div class="pay-tag" style="color:${t.color};border-color:${t.border};background:${t.light}">${c.pay||'$?'}</div>`
-    : '';
+  const badge = type==='paid' ? `<div class="pay-tag" style="color:${t.color};border-color:${t.border};background:${t.light}">${c.pay||'$?'}</div>` : '';
+  el.innerHTML=`<div class="chore-body"><div class="chore-name">${c.name}</div><div class="cwho-row">${whoHTML}</div></div>${badge}`;
 
-  el.innerHTML = `
-    <div class="cbody">
-      <div class="cname">${c.name}</div>
-      <div class="cwho-row">${whoHTML}</div>
-    </div>${badge}`;
-
-  // Clicking individual kid tags on "Both" chores
-  if (c.who === 'Both') {
+  if (c.who==='Both') {
     el.querySelectorAll('.who-tag').forEach(tag => {
-      tag.addEventListener('click', e => {
-        e.stopPropagation();
-        toggleKid(c.id, type, tag.dataset.kid);
-      });
+      tag.addEventListener('click', e => { e.stopPropagation(); toggleKid(c.id, type, tag.dataset.kid); });
     });
-    // clicking the chore body (not a tag) does nothing for "Both" chores
   } else {
-    // single person — tap the whole row to toggle
     el.addEventListener('click', () => toggleSingle(c.id, type));
   }
-
-  // long-press / right-click to delete
-  let pressTimer;
-  el.addEventListener('touchstart', () => { pressTimer = setTimeout(() => openDel(c.id, type, c.name), 600); }, { passive: true });
-  el.addEventListener('touchend',   () => clearTimeout(pressTimer));
-  el.addEventListener('touchmove',  () => clearTimeout(pressTimer));
-  el.addEventListener('contextmenu', e => { e.preventDefault(); openDel(c.id, type, c.name); });
-
+  let pt;
+  el.addEventListener('touchstart', () => { pt=setTimeout(()=>openDel(c.id,type,c.name),600); }, {passive:true});
+  el.addEventListener('touchend',   () => clearTimeout(pt));
+  el.addEventListener('touchmove',  () => clearTimeout(pt));
+  el.addEventListener('contextmenu', e => { e.preventDefault(); openDel(c.id,type,c.name); });
   return el;
 }
+async function toggleKid(id,type,kid) {
+  const c=CS.chores[type].find(x=>x.id===id); if(!c)return;
+  if(!c.doneBy)c.doneBy=[];
+  if(c.doneBy.includes(kid)) c.doneBy=c.doneBy.filter(k=>k!==kid);
+  else c.doneBy.push(kid);
+  renderChores(); await saveChores();
+}
+async function toggleSingle(id,type) {
+  const c=CS.chores[type].find(x=>x.id===id);
+  if(c){ c.done=!c.done; renderChores(); await saveChores(); }
+}
 
-async function toggleKid(id, type, kid) {
-  const c = S.chores[type].find(x => x.id === id);
-  if (!c) return;
-  if (!c.doneBy) c.doneBy = [];
-  if (c.doneBy.includes(kid)) {
-    c.doneBy = c.doneBy.filter(k => k !== kid);
-  } else {
-    c.doneBy.push(kid);
+// ── CHORE MODALS ─────────────────────────────────────────────────────────────
+window.openAdd = function(col) {
+  addCol=col;
+  const titles={daily:'Add daily chore',weekly:'Add weekly chore',paid:'Add paid chore'};
+  const subs={daily:'Appears every day',weekly:'Resets every Sunday',paid:'Kids can earn money'};
+  document.getElementById('add-h').textContent=titles[col];
+  document.getElementById('add-p').textContent=subs[col];
+  document.getElementById('add-name').value='';
+  document.getElementById('add-pay').value='';
+  document.getElementById('add-pay-w').style.display=col==='paid'?'':'none';
+  document.getElementById('add-ov').style.display='flex';
+};
+window.closeAdd = () => document.getElementById('add-ov').style.display='none';
+window.saveChore = async function() {
+  const name=document.getElementById('add-name').value.trim(); if(!name)return;
+  const who=document.getElementById('add-who').value;
+  const base={id:'c'+Date.now(),name};
+  if(addCol==='paid') base.pay=document.getElementById('add-pay').value||'$?';
+  if(who==='Both'){base.who='Both';base.doneBy=[];}
+  else{base.who=who;base.done=false;}
+  CS.chores[addCol].push(base);
+  renderChores(); closeAdd(); await saveChores();
+};
+
+function openDel(id,type,name) {
+  delTarget={id,type};
+  document.getElementById('del-lbl').textContent=`"${name}" will be permanently removed.`;
+  document.getElementById('del-ov').style.display='flex';
+}
+window.closeDel = () => { document.getElementById('del-ov').style.display='none'; delTarget=null; };
+window.confirmDel = async function() {
+  if(!delTarget)return;
+  CS.chores[delTarget.type]=CS.chores[delTarget.type].filter(c=>c.id!==delTarget.id);
+  renderChores(); closeDel(); await saveChores();
+};
+
+window.openPin = function() {
+  pinBuf=''; document.getElementById('perr').textContent=''; updateDots();
+  document.getElementById('pin-ov').style.display='flex';
+};
+window.closePin = () => { document.getElementById('pin-ov').style.display='none'; pinBuf=''; };
+window.pk = function(k) {
+  if(k==='back'){pinBuf=pinBuf.slice(0,-1);updateDots();return;}
+  if(pinBuf.length>=4)return;
+  pinBuf+=k; updateDots();
+  if(pinBuf.length===4){
+    setTimeout(()=>{
+      if(pinBuf===CS.pin){closePin();openSet();}
+      else{document.getElementById('perr').textContent='Wrong PIN — try again';pinBuf='';updateDots();}
+    },150);
   }
-  render(); await save();
+};
+function updateDots(){for(let i=0;i<4;i++)document.getElementById('pd'+i).classList.toggle('on',i<pinBuf.length);}
+function openSet(){document.getElementById('sc').value='';document.getElementById('sn').value='';document.getElementById('serr').textContent='';document.getElementById('set-ov').style.display='flex';}
+window.closeSet = () => document.getElementById('set-ov').style.display='none';
+window.savePin = async function(){
+  const cur=document.getElementById('sc').value,nw=document.getElementById('sn').value;
+  if(cur!==CS.pin){document.getElementById('serr').textContent='Current PIN is wrong';return;}
+  if(!/^\d{4}$/.test(nw)){document.getElementById('serr').textContent='PIN must be exactly 4 digits';return;}
+  CS.pin=nw; await saveChores(); document.getElementById('serr').textContent=''; closeSet();
+};
+window.resetAll = async function(){
+  if(!confirm('Clear all completed chores?'))return;
+  ['daily','weekly','paid'].forEach(t=>CS.chores[t].forEach(c=>{if(c.who==='Both')c.doneBy=[];else c.done=false;}));
+  renderChores(); closeSet(); await saveChores();
+};
+
+// ── MEAL PLANNER ─────────────────────────────────────────────────────────────
+const MEAL_API = '8a4c13fcd0a74d8aaaf0fc67118b8740';
+const CUISINES = ['Any','American','Italian','Mexican','Asian','Indian','Thai','Japanese'];
+const MEAL_DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let selectedCuisine='Any';
+let mealPlan = JSON.parse(localStorage.getItem('mealplan')||'{}');
+let groceryChecked = JSON.parse(localStorage.getItem('grocerychecked')||'[]');
+let groceryItems = JSON.parse(localStorage.getItem('groceryitems')||'[]');
+
+function saveMealPlan(){localStorage.setItem('mealplan',JSON.stringify(mealPlan));updateMealSub();}
+function saveChecked(){localStorage.setItem('grocerychecked',JSON.stringify(groceryChecked));}
+function updateMealSub(){
+  const total=Object.values(mealPlan).flat().length;
+  document.getElementById('meal-header-sub').textContent=total===0?'Plan your week':`${total} meal${total!==1?'s':''} planned`;
+}
+updateMealSub();
+
+// Build cuisine pills
+const cr=document.getElementById('cuisine-row');
+CUISINES.forEach(c=>{
+  const btn=document.createElement('button');
+  btn.className='c-pill'+(c==='Any'?' on':'');
+  btn.textContent=c;
+  btn.onclick=()=>{
+    selectedCuisine=c;
+    document.querySelectorAll('.c-pill').forEach(p=>p.classList.remove('on'));
+    btn.classList.add('on');
+  };
+  cr.appendChild(btn);
+});
+
+window.showMealTab = function(name) {
+  ['suggest','plan','grocery'].forEach(n=>{
+    document.getElementById('meal-'+n).classList.toggle('active',n===name);
+  });
+  document.querySelectorAll('.meal-tab').forEach((t,i)=>{
+    t.classList.toggle('active',['suggest','plan','grocery'][i]===name);
+  });
+  if(name==='plan') renderMealPlan();
+  if(name==='grocery') renderGrocery();
+};
+
+window.fetchSuggestions = async function() {
+  const btn=document.getElementById('suggest-btn');
+  const grid=document.getElementById('meal-grid');
+  btn.disabled=true; btn.textContent='Finding meals...';
+  grid.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><br>Finding meal ideas...</div>';
+  try {
+    const cuisine=selectedCuisine==='Any'?'':`&cuisine=${selectedCuisine}`;
+    const res=await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${MEAL_API}&number=5${cuisine}&addRecipeInformation=true`);
+    const data=await res.json();
+    if(!data.recipes||!data.recipes.length){grid.innerHTML='<div class="spinner-wrap">No results. Try a different cuisine!</div>';return;}
+    renderMealCards(data.recipes);
+  } catch(e){grid.innerHTML='<div class="spinner-wrap">Something went wrong. Try again.</div>';}
+  finally{btn.disabled=false;btn.textContent='Find Meal Ideas';}
+};
+
+function renderMealCards(recipes){
+  const grid=document.getElementById('meal-grid');
+  grid.innerHTML='';
+  recipes.forEach(r=>{
+    const isAdded=Object.values(mealPlan).flat().some(m=>m.id===r.id);
+    const card=document.createElement('div');
+    card.className='meal-card';
+    card.innerHTML=`
+      ${r.image?`<img class="meal-img" src="${r.image}" alt="${r.title}" loading="lazy">`:`<div class="meal-img-ph">🍽️</div>`}
+      <div class="meal-body">
+        <div class="meal-name">${r.title}</div>
+        <div class="meal-meta">
+          ${r.readyInMinutes?`<span>⏱ ${r.readyInMinutes} min</span>`:''}
+          ${r.servings?`<span>👤 Serves ${r.servings}</span>`:''}
+          ${r.cuisines&&r.cuisines.length?`<span>🌍 ${r.cuisines[0]}</span>`:''}
+        </div>
+        <div class="meal-actions">
+          <button class="btn-add ${isAdded?'added':''}" id="addbtn-${r.id}"
+            onclick="addMealToPlan(${r.id},'${r.title.replace(/'/g,"\\'")}','${r.image||''}')">
+            ${isAdded?'✓ Added':'+ Add to Plan'}
+          </button>
+          <button class="btn-recipe" onclick="openRecipe(${r.id})">Recipe</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
 }
 
-async function toggleSingle(id, type) {
-  const c = S.chores[type].find(x => x.id === id);
-  if (c) { c.done = !c.done; render(); await save(); }
+window.addMealToPlan = function(id,title,image){
+  const day=prompt(`Add "${title}" to which day?\n\n${MEAL_DAYS.map((d,i)=>`${i+1}. ${d}`).join('\n')}\n\nType a number 1-7:`);
+  if(!day)return;
+  const idx=parseInt(day)-1;
+  if(idx<0||idx>6)return;
+  const dayName=MEAL_DAYS[idx];
+  if(!mealPlan[dayName])mealPlan[dayName]=[];
+  if(!mealPlan[dayName].find(m=>m.id===id))mealPlan[dayName].push({id,title,image});
+  saveMealPlan();
+  const btn=document.getElementById('addbtn-'+id);
+  if(btn){btn.textContent='✓ Added';btn.classList.add('added');}
+};
+
+function renderMealPlan(){
+  const el=document.getElementById('plan-list');
+  el.innerHTML='';
+  const hasMeals=Object.values(mealPlan).some(m=>m.length>0);
+  if(!hasMeals){el.innerHTML='<div class="empty-state">No meals planned yet.<br>Go to Suggest to find meal ideas!</div>';return;}
+  MEAL_DAYS.forEach(day=>{
+    if(!mealPlan[day]||!mealPlan[day].length)return;
+    const block=document.createElement('div');
+    block.className='plan-day';
+    const rows=mealPlan[day].map((m,i)=>`
+      <div class="plan-meal-row">
+        <div class="plan-meal-name">${m.title}</div>
+        <button class="btn-remove" onclick="removeMeal('${day}',${i})">Remove</button>
+      </div>`).join('');
+    block.innerHTML=`<div class="plan-day-head"><div class="plan-day-name">${day}</div><div style="font-size:12px;color:var(--meal-green);font-weight:700">${mealPlan[day].length} meal${mealPlan[day].length!==1?'s':''}</div></div>${rows}`;
+    el.appendChild(block);
+  });
+  const gbtn=document.createElement('button');
+  gbtn.className='suggest-btn';
+  gbtn.style.marginTop='14px';
+  gbtn.textContent='Build Grocery List';
+  gbtn.onclick=async()=>{await buildGroceryList();showMealTab('grocery');};
+  el.appendChild(gbtn);
 }
 
-// ── ADD ──────────────────────────────────────────────────────────────────────
-function openAdd(col) {
-  addCol = col;
-  const titles = { daily:'Add daily chore', weekly:'Add weekly chore', paid:'Add paid chore' };
-  const subs   = { daily:'Appears every day', weekly:'Pinned to a day of the week', paid:'Kids can earn money for this' };
-  document.getElementById('add-h').textContent = titles[col];
-  document.getElementById('add-p').textContent = subs[col];
-  document.getElementById('add-name').value = '';
-  document.getElementById('add-pay').value  = '';
-  document.getElementById('add-day-w').style.display = col === 'weekly' ? '' : 'none';
-  document.getElementById('add-pay-w').style.display = col === 'paid'   ? '' : 'none';
-  document.getElementById('add-ov').style.display = 'flex';
-  setTimeout(() => document.getElementById('add-name').focus(), 100);
-}
-function closeAdd() { document.getElementById('add-ov').style.display = 'none'; }
-async function saveChore() {
-  const name = document.getElementById('add-name').value.trim();
-  if (!name) return;
-  const who = document.getElementById('add-who').value;
-  const base = { id: 'c' + Date.now(), name };
-  if (addCol === 'weekly') base.day = document.getElementById('add-day').value;
-  if (addCol === 'paid')   base.pay = document.getElementById('add-pay').value || '$?';
+window.removeMeal = function(day,idx){
+  mealPlan[day].splice(idx,1);
+  saveMealPlan(); renderMealPlan();
+};
 
-  if (who === 'Both') {
-    base.who = 'Both';
-    base.doneBy = [];
-  } else {
-    base.who = who;
-    base.done = false;
+async function buildGroceryList(){
+  const allIds=Object.values(mealPlan).flat().map(m=>m.id);
+  if(!allIds.length)return;
+  const ingredientMap={};
+  for(const id of allIds){
+    const res=await fetch(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${MEAL_API}&includeNutrition=false`);
+    const r=await res.json();
+    (r.extendedIngredients||[]).forEach(ing=>{
+      const key=ing.name.toLowerCase();
+      if(ingredientMap[key])ingredientMap[key].amount+=ing.amount;
+      else ingredientMap[key]={name:ing.name,amount:ing.amount,unit:ing.unit,aisle:ing.aisle||'Other'};
+    });
   }
-  S.chores[addCol].push(base);
-  render(); closeAdd(); await save();
-}
-
-// ── DELETE ───────────────────────────────────────────────────────────────────
-function openDel(id, type, name) {
-  delTarget = { id, type };
-  document.getElementById('del-lbl').textContent = '"' + name + '" will be permanently removed.';
-  document.getElementById('del-ov').style.display = 'flex';
-}
-function closeDel() { document.getElementById('del-ov').style.display = 'none'; delTarget = null; }
-async function confirmDel() {
-  if (!delTarget) return;
-  S.chores[delTarget.type] = S.chores[delTarget.type].filter(c => c.id !== delTarget.id);
-  render(); closeDel(); await save();
-}
-
-// ── PIN ──────────────────────────────────────────────────────────────────────
-function openPin() {
-  pinBuf = '';
-  document.getElementById('perr').textContent = '';
-  updateDots();
-  document.getElementById('pin-ov').style.display = 'flex';
-}
-function closePin() { document.getElementById('pin-ov').style.display = 'none'; pinBuf = ''; }
-function pk(k) {
-  if (k === 'back') { pinBuf = pinBuf.slice(0, -1); updateDots(); return; }
-  if (pinBuf.length >= 4) return;
-  pinBuf += k; updateDots();
-  if (pinBuf.length === 4) {
-    setTimeout(() => {
-      if (pinBuf === S.pin) { closePin(); openSet(); }
-      else {
-        document.getElementById('perr').textContent = 'Wrong PIN — try again';
-        pinBuf = ''; updateDots();
-      }
-    }, 150);
-  }
-}
-function updateDots() {
-  for (let i = 0; i < 4; i++)
-    document.getElementById('pd' + i).classList.toggle('on', i < pinBuf.length);
-}
-
-// ── SETTINGS ─────────────────────────────────────────────────────────────────
-function openSet() {
-  document.getElementById('sc').value = '';
-  document.getElementById('sn').value = '';
-  document.getElementById('serr').textContent = '';
-  document.getElementById('set-ov').style.display = 'flex';
-}
-function closeSet() { document.getElementById('set-ov').style.display = 'none'; }
-async function savePin() {
-  const cur = document.getElementById('sc').value;
-  const nw  = document.getElementById('sn').value;
-  if (cur !== S.pin)           { document.getElementById('serr').textContent = 'Current PIN is wrong'; return; }
-  if (!/^\d{4}$/.test(nw))    { document.getElementById('serr').textContent = 'PIN must be exactly 4 digits'; return; }
-  S.pin = nw; await save();
-  document.getElementById('serr').textContent = '';
-  closeSet();
-}
-async function resetAll() {
-  if (!confirm('Clear all completed chores? This cannot be undone.')) return;
-  ['daily','weekly','paid'].forEach(t => S.chores[t].forEach(c => {
-    if (c.who === 'Both') c.doneBy = [];
-    else c.done = false;
+  groceryItems=Object.values(ingredientMap).map((ing,i)=>({
+    id:i,name:ing.name,
+    amount:ing.amount?`${Math.round(ing.amount*10)/10} ${ing.unit}`.trim():'',
+    aisle:ing.aisle
   }));
-  render(); closeSet(); await save();
+  groceryChecked=[];
+  localStorage.setItem('groceryitems',JSON.stringify(groceryItems));
+  saveChecked();
 }
 
-// ── KEYBOARD ─────────────────────────────────────────────────────────────────
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('add-ov').style.display !== 'none') saveChore();
-  if (e.key === 'Escape') { closeAdd(); closeDel(); closePin(); closeSet(); }
+function renderGrocery(){
+  const el=document.getElementById('grocery-list');
+  const prog=document.getElementById('grocery-progress');
+  el.innerHTML='';
+  if(!groceryItems.length){
+    el.innerHTML='<div class="empty-state">No grocery list yet.<br>Go to This Week and tap "Build Grocery List"!</div>';
+    prog.textContent=''; return;
+  }
+  prog.textContent=`${groceryChecked.length} of ${groceryItems.length} items checked off`;
+  const byAisle={};
+  groceryItems.forEach(item=>{
+    const a=item.aisle||'Other';
+    if(!byAisle[a])byAisle[a]=[];
+    byAisle[a].push(item);
+  });
+  Object.keys(byAisle).sort().forEach(aisle=>{
+    const sec=document.createElement('div');
+    sec.innerHTML=`<div class="grocery-section-title">${aisle}</div>`;
+    byAisle[aisle].forEach(item=>{
+      const checked=groceryChecked.includes(item.id);
+      const row=document.createElement('div');
+      row.className='grocery-item'+(checked?' checked':'');
+      row.innerHTML=`<div class="gi-check">${checked?'✓':''}</div><div class="gi-name">${item.name}</div><div class="gi-amount">${item.amount}</div>`;
+      row.onclick=()=>{
+        if(groceryChecked.includes(item.id))groceryChecked=groceryChecked.filter(i=>i!==item.id);
+        else groceryChecked.push(item.id);
+        saveChecked(); renderGrocery();
+      };
+      sec.appendChild(row);
+    });
+    el.appendChild(sec);
+  });
+  const clr=document.createElement('button');
+  clr.className='clear-btn';
+  clr.textContent='Clear grocery list';
+  clr.onclick=()=>{if(confirm('Clear the grocery list?')){groceryItems=[];groceryChecked=[];localStorage.setItem('groceryitems','[]');saveChecked();renderGrocery();}};
+  el.appendChild(clr);
+}
+
+// ── RECIPE ───────────────────────────────────────────────────────────────────
+window.openRecipe = async function(id){
+  document.getElementById('recipe-ov').style.display='flex';
+  document.getElementById('recipe-sheet').innerHTML='<div class="spinner-wrap"><div class="spinner"></div><br>Loading recipe...</div>';
+  try{
+    const res=await fetch(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${MEAL_API}&includeNutrition=false`);
+    const r=await res.json();
+    const ings=(r.extendedIngredients||[]).map(i=>`<div class="recipe-ing">${i.original}</div>`).join('');
+    const steps=(r.analyzedInstructions?.[0]?.steps||[]).map((s,i)=>`<div class="recipe-step"><div class="step-num">${i+1}</div><div class="step-txt">${s.step}</div></div>`).join('');
+    document.getElementById('recipe-sheet').innerHTML=`
+      ${r.image?`<img src="${r.image}" style="width:100%;border-radius:12px;margin-bottom:14px;object-fit:cover;height:190px">`:''}
+      <h2>${r.title}</h2>
+      <div class="recipe-meta">
+        ${r.readyInMinutes?`<span>⏱ ${r.readyInMinutes} min</span>`:''}
+        ${r.servings?`<span>👤 Serves ${r.servings}</span>`:''}
+        ${r.cuisines?.length?`<span>🌍 ${r.cuisines[0]}</span>`:''}
+      </div>
+      <div class="recipe-section-title">Ingredients</div>
+      ${ings||'<p style="color:var(--muted);font-size:14px">No ingredients listed</p>'}
+      <div class="recipe-section-title">Instructions</div>
+      ${steps||`<p style="font-size:14px;color:var(--muted)">See full recipe at <a href="${r.sourceUrl}" target="_blank" style="color:var(--meal-green)">${r.sourceName||'source'}</a></p>`}
+      <button class="close-btn" onclick="closeRecipe()">Close</button>`;
+  }catch(e){
+    document.getElementById('recipe-sheet').innerHTML='<div class="spinner-wrap">Could not load recipe.</div><button class="close-btn" onclick="closeRecipe()">Close</button>';
+  }
+};
+window.closeRecipe = () => document.getElementById('recipe-ov').style.display='none';
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){closeAdd&&closeAdd();closeDel&&closeDel();closePin&&closePin();closeSet&&closeSet();closeRecipe&&closeRecipe();}
 });
 </script>
 </body>
