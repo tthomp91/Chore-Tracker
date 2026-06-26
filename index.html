@@ -332,7 +332,23 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCe9zNmLpJj3oPUpNCpSTuHqZFHUvfVpiU",
+  authDomain: "family-chores-960cd.firebaseapp.com",
+  projectId: "family-chores-960cd",
+  storageBucket: "family-chores-960cd.firebasestorage.app",
+  messagingSenderId: "271324049535",
+  appId: "1:271324049535:web:c002dc4e0c1772d95a0f4a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const REF = doc(db, 'family', 'chores');
+
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 // Color theme per person
@@ -380,8 +396,9 @@ const DEFAULTS = {
   ],
 };
 
-let S = load();
+let S = { chores: JSON.parse(JSON.stringify(DEFAULTS)), pin: '1234', lastDailyReset: '', lastWeeklyReset: '' };
 let pinBuf = '', delTarget = null, addCol = null;
+let _ignoreNext = false; // prevent echo-loop on save
 
 function lastSunday() {
   const now = new Date();
@@ -398,32 +415,62 @@ function clearChores(types) {
   }));
 }
 
-function load() {
-  try {
-    const raw = localStorage.getItem('familychores_v5');
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return { chores: JSON.parse(JSON.stringify(DEFAULTS)), pin: '1234', lastDailyReset: '', lastWeeklyReset: '' };
-}
-function save() {
-  try { localStorage.setItem('familychores_v5', JSON.stringify(S)); } catch(e) {}
+async function save() {
+  _ignoreNext = true;
+  try { await setDoc(REF, JSON.parse(JSON.stringify(S))); } catch(e) { console.error('Save failed', e); }
 }
 
 function checkAutoReset() {
   const todayStr = today();
   const sunStr   = lastSunday();
+  let dirty = false;
   if (S.lastDailyReset !== todayStr) {
     clearChores(['daily']);
     S.lastDailyReset = todayStr;
-    save();
+    dirty = true;
   }
   if (S.lastWeeklyReset !== sunStr) {
     clearChores(['weekly', 'paid']);
     S.lastWeeklyReset = sunStr;
-    save();
+    dirty = true;
   }
+  return dirty;
 }
-checkAutoReset();
+
+// Show a loading state while we fetch from Firestore
+document.getElementById('list-daily').innerHTML   = '<div class="empty">Loading...</div>';
+document.getElementById('list-weekly').innerHTML  = '<div class="empty">Loading...</div>';
+document.getElementById('list-paid').innerHTML    = '<div class="empty">Loading...</div>';
+
+// Boot: fetch once, apply resets if needed, then subscribe to live updates
+(async () => {
+  try {
+    const snap = await getDoc(REF);
+    if (snap.exists()) {
+      S = snap.data();
+      // Make sure arrays exist on old data
+      ['daily','weekly','paid'].forEach(t => { if (!S.chores[t]) S.chores[t] = []; });
+    } else {
+      // First time ever -- seed with defaults and save to Firebase
+      S = { chores: JSON.parse(JSON.stringify(DEFAULTS)), pin: '1234', lastDailyReset: today(), lastWeeklyReset: lastSunday() };
+      await save();
+    }
+    const dirty = checkAutoReset();
+    if (dirty) await save();
+    render();
+
+    // Live listener — updates all devices in real time
+    onSnapshot(REF, snap => {
+      if (_ignoreNext) { _ignoreNext = false; return; }
+      if (snap.exists()) { S = snap.data(); render(); }
+    });
+  } catch(e) {
+    console.error('Firebase error', e);
+    // Fall back to defaults so app still works offline
+    checkAutoReset();
+    render();
+  }
+})();
 
 // ── RENDER ──────────────────────────────────────────────────────────────────
 function render() {
@@ -522,7 +569,7 @@ function makeChore(c, type) {
   return el;
 }
 
-function toggleKid(id, type, kid) {
+async function toggleKid(id, type, kid) {
   const c = S.chores[type].find(x => x.id === id);
   if (!c) return;
   if (!c.doneBy) c.doneBy = [];
@@ -531,12 +578,12 @@ function toggleKid(id, type, kid) {
   } else {
     c.doneBy.push(kid);
   }
-  save(); render();
+  render(); await save();
 }
 
-function toggleSingle(id, type) {
+async function toggleSingle(id, type) {
   const c = S.chores[type].find(x => x.id === id);
-  if (c) { c.done = !c.done; save(); render(); }
+  if (c) { c.done = !c.done; render(); await save(); }
 }
 
 // ── ADD ──────────────────────────────────────────────────────────────────────
@@ -554,7 +601,7 @@ function openAdd(col) {
   setTimeout(() => document.getElementById('add-name').focus(), 100);
 }
 function closeAdd() { document.getElementById('add-ov').style.display = 'none'; }
-function saveChore() {
+async function saveChore() {
   const name = document.getElementById('add-name').value.trim();
   if (!name) return;
   const who = document.getElementById('add-who').value;
@@ -570,7 +617,7 @@ function saveChore() {
     base.done = false;
   }
   S.chores[addCol].push(base);
-  save(); render(); closeAdd();
+  render(); closeAdd(); await save();
 }
 
 // ── DELETE ───────────────────────────────────────────────────────────────────
@@ -580,10 +627,10 @@ function openDel(id, type, name) {
   document.getElementById('del-ov').style.display = 'flex';
 }
 function closeDel() { document.getElementById('del-ov').style.display = 'none'; delTarget = null; }
-function confirmDel() {
+async function confirmDel() {
   if (!delTarget) return;
   S.chores[delTarget.type] = S.chores[delTarget.type].filter(c => c.id !== delTarget.id);
-  save(); render(); closeDel();
+  render(); closeDel(); await save();
 }
 
 // ── PIN ──────────────────────────────────────────────────────────────────────
@@ -621,22 +668,22 @@ function openSet() {
   document.getElementById('set-ov').style.display = 'flex';
 }
 function closeSet() { document.getElementById('set-ov').style.display = 'none'; }
-function savePin() {
+async function savePin() {
   const cur = document.getElementById('sc').value;
   const nw  = document.getElementById('sn').value;
   if (cur !== S.pin)           { document.getElementById('serr').textContent = 'Current PIN is wrong'; return; }
   if (!/^\d{4}$/.test(nw))    { document.getElementById('serr').textContent = 'PIN must be exactly 4 digits'; return; }
-  S.pin = nw; save();
+  S.pin = nw; await save();
   document.getElementById('serr').textContent = '';
   closeSet();
 }
-function resetAll() {
+async function resetAll() {
   if (!confirm('Clear all completed chores? This cannot be undone.')) return;
   ['daily','weekly','paid'].forEach(t => S.chores[t].forEach(c => {
     if (c.who === 'Both') c.doneBy = [];
     else c.done = false;
   }));
-  save(); render(); closeSet();
+  render(); closeSet(); await save();
 }
 
 // ── KEYBOARD ─────────────────────────────────────────────────────────────────
@@ -644,8 +691,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('add-ov').style.display !== 'none') saveChore();
   if (e.key === 'Escape') { closeAdd(); closeDel(); closePin(); closeSet(); }
 });
-
-render();
 </script>
 </body>
 </html>
