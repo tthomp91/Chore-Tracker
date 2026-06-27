@@ -478,6 +478,45 @@ body {
 .spinner-wrap { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; font-weight: 600; }
 .spinner { display: inline-block; width: 26px; height: 26px; border: 3px solid var(--border); border-top-color: var(--meal-green); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 10px; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── CALENDAR ── */
+.cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.cal-month-label { font-family:'Nunito',sans-serif; font-size:20px; font-weight:900; color:var(--brown-d); }
+.cal-nav { display:flex; gap:8px; }
+.cal-nav-btn { padding:7px 14px; border-radius:9px; border:1.5px solid var(--border); background:var(--card); color:var(--muted); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .15s; }
+.cal-nav-btn:hover { color:var(--brown-d); border-color:var(--brown); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-dow { text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted); padding:6px 0 8px; }
+.cal-cell { min-height:90px; background:var(--card); border-radius:10px; border:1.5px solid var(--border); padding:6px; cursor:pointer; transition:all .15s; position:relative; }
+.cal-cell:hover { border-color:var(--brown); }
+.cal-cell.other-month { background:var(--warm); opacity:0.5; }
+.cal-cell.today { border-color:var(--brown); border-width:2px; }
+.cal-cell.today .cal-day-num { background:var(--brown-d); color:#fff; border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+.cal-day-num { font-size:13px; font-weight:800; color:var(--text); margin-bottom:4px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+.cal-event { font-size:10px; font-weight:700; padding:2px 5px; border-radius:4px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.cal-event:hover { opacity:0.8; }
+.cal-more { font-size:10px; color:var(--muted); font-weight:700; padding:1px 4px; }
+
+/* event category colors */
+.cat-school    { background:#DBEAFE; color:#1D4ED8; }
+.cat-birthday  { background:#FCE7F3; color:#BE185D; }
+.cat-appointment { background:#D1FAE5; color:#065F46; }
+.cat-bill      { background:#FEF3C7; color:#92400E; }
+.cat-holiday   { background:#EDE9FE; color:#5B21B6; }
+.cat-activity  { background:#FFEDD5; color:#9A3412; }
+.cat-other     { background:#F1F5F9; color:#475569; }
+
+/* upcoming events sidebar */
+.cal-layout { display:grid; grid-template-columns:1fr 260px; gap:16px; }
+.upcoming-panel { background:var(--card); border-radius:14px; border:1.5px solid var(--border); padding:14px; box-shadow:0 2px 8px var(--shadow); }
+.upcoming-title { font-family:'Nunito',sans-serif; font-size:15px; font-weight:900; color:var(--brown-d); margin-bottom:12px; }
+.upcoming-event { display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px solid var(--border); }
+.upcoming-event:last-child { border-bottom:none; }
+.upcoming-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.upcoming-info { flex:1; min-width:0; }
+.upcoming-name { font-size:13px; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.upcoming-date { font-size:11px; color:var(--muted); font-weight:600; margin-top:1px; }
+.upcoming-empty { font-size:13px; color:var(--muted); font-weight:600; text-align:center; padding:20px 0; }
 .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
 </style>
 </head>
@@ -583,13 +622,28 @@ body {
   <!-- CALENDAR PAGE -->
   <div class="page-view" id="page-calendar">
     <div class="page-header">
-      <div><div class="page-header-title">Calendar</div><div class="page-header-sub">Important dates & events</div></div>
+      <div><div class="page-header-title">Calendar</div><div class="page-header-sub" id="cal-sub">Family events & important dates</div></div>
+      <button class="hbtn" onclick="openCalAdd()">+ Add Event</button>
     </div>
     <div class="scroll-area">
-      <div class="coming-soon">
-        <div class="coming-soon-icon">📅</div>
-        <h2>Coming Soon</h2>
-        <p>The family calendar is on its way.<br>Check back soon!</p>
+      <div class="cal-layout">
+        <div>
+          <div class="cal-header">
+            <div class="cal-month-label" id="cal-month-label"></div>
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+              <button class="cal-nav-btn" onclick="calNav(0)">Today</button>
+              <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div>
+          <div class="upcoming-panel">
+            <div class="upcoming-title">Upcoming Events</div>
+            <div id="upcoming-list"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -663,7 +717,52 @@ body {
   </div>
 </div>
 
-<!-- RECIPE SHEET -->
+<!-- CALENDAR EVENT MODAL -->
+<div class="overlay" id="cal-add-ov" style="display:none" onclick="if(event.target===this)closeCalAdd()">
+  <div class="modal">
+    <h2 id="cal-modal-title">Add Event</h2><p id="cal-modal-sub"></p>
+    <label>Event name</label><input id="cal-name" placeholder="e.g. Amelia's dentist appointment">
+    <label>Date</label><input id="cal-date" type="date">
+    <label>Time (optional)</label><input id="cal-time" type="time">
+    <label>Category</label>
+    <select id="cal-cat">
+      <option value="school">🎒 School</option>
+      <option value="birthday">🎂 Birthday</option>
+      <option value="appointment">🏥 Appointment</option>
+      <option value="bill">💳 Bill Due</option>
+      <option value="holiday">🎉 Holiday</option>
+      <option value="activity">⚽ Activity</option>
+      <option value="other">📌 Other</option>
+    </select>
+    <label>Who</label>
+    <select id="cal-who">
+      <option value="Family">Whole Family</option>
+      <option value="Amelia">Amelia</option>
+      <option value="Lucas">Lucas</option>
+      <option value="Taylor">Taylor</option>
+      <option value="Kara">Kara</option>
+    </select>
+    <div class="mrow">
+      <button class="mbtn mbtn-no" onclick="closeCalAdd()">Cancel</button>
+      <button class="mbtn mbtn-ok" onclick="saveCalEvent()">Save Event</button>
+    </div>
+    <div id="cal-del-row" style="display:none;margin-top:10px">
+      <button class="mbtn mbtn-del" style="width:100%" onclick="deleteCalEvent()">Delete Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR DAY MODAL -->
+<div class="overlay" id="cal-day-ov" style="display:none" onclick="if(event.target===this)closeCalDay()">
+  <div class="modal">
+    <h2 id="cal-day-title"></h2>
+    <div id="cal-day-events"></div>
+    <div class="mrow" style="margin-top:14px">
+      <button class="mbtn mbtn-no" onclick="closeCalDay()">Close</button>
+      <button class="mbtn mbtn-ok" onclick="closeCalDay();openCalAdd(calDaySelected)">+ Add Event</button>
+    </div>
+  </div>
+</div>
 <div class="recipe-overlay" id="recipe-ov" style="display:none" onclick="if(event.target===this)closeRecipe()">
   <div class="recipe-sheet" id="recipe-sheet">
     <div class="spinner-wrap"><div class="spinner"></div><br>Loading recipe...</div>
@@ -698,6 +797,7 @@ window.showPage = function(name) {
     document.getElementById('nav-' + p).classList.toggle('active', p === name);
   });
   if (name === 'meals') { renderMealPlan(); renderGrocery(); }
+  if (name === 'calendar') renderCalendar();
 };
 
 // ── CHORE THEME ──────────────────────────────────────────────────────────────
@@ -1227,8 +1327,254 @@ window.openRecipe = async function(id){
 };
 window.closeRecipe = () => document.getElementById('recipe-ov').style.display='none';
 
+// ── CALENDAR ─────────────────────────────────────────────────────────────────
+const CAL_REF = doc(db, 'family', 'calendar');
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAT_COLORS = { school:'#1D4ED8', birthday:'#BE185D', appointment:'#065F46', bill:'#92400E', holiday:'#5B21B6', activity:'#9A3412', other:'#475569' };
+const CAT_BG    = { school:'#DBEAFE', birthday:'#FCE7F3', appointment:'#D1FAE5', bill:'#FEF3C7', holiday:'#EDE9FE', activity:'#FFEDD5', other:'#F1F5F9' };
+
+let calEvents = {};   // keyed by 'YYYY-MM-DD' -> array of events
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calDaySelected = null;
+let editingEventId = null;
+let _calIgnore = false;
+
+async function saveCalEvents() {
+  _calIgnore = true;
+  try { await setDoc(CAL_REF, { events: calEvents }); } catch(e){ console.error(e); }
+}
+
+// Boot calendar from Firebase
+(async () => {
+  try {
+    const snap = await getDoc(CAL_REF);
+    if (snap.exists()) calEvents = snap.data().events || {};
+    renderCalendar();
+    onSnapshot(CAL_REF, snap => {
+      if (_calIgnore) { _calIgnore=false; return; }
+      if (snap.exists()) { calEvents = snap.data().events || {}; renderCalendar(); }
+    });
+  } catch(e) { console.error(e); renderCalendar(); }
+})();
+
+function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  if (label) label.textContent = `${MONTHS[calMonth]} ${calYear}`;
+  renderCalGrid();
+  renderUpcoming();
+  // update nav item "Soon" badge -- remove it now calendar is live
+  const navCal = document.getElementById('nav-calendar');
+  const badge = navCal && navCal.querySelector('.nav-coming');
+  if (badge) badge.remove();
+}
+
+function renderCalGrid() {
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const dows = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  dows.forEach(d => {
+    const h = document.createElement('div');
+    h.className = 'cal-dow';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  // prev month filler
+  for (let i = firstDay-1; i >= 0; i--) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell other-month';
+    const n = document.createElement('div');
+    n.className = 'cal-day-num';
+    n.textContent = daysInPrev - i;
+    cell.appendChild(n);
+    grid.appendChild(cell);
+  }
+
+  // current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell' + (dateStr === todayStr ? ' today' : '');
+    cell.onclick = () => openCalDay(dateStr);
+
+    const n = document.createElement('div');
+    n.className = 'cal-day-num';
+    n.textContent = d;
+    cell.appendChild(n);
+
+    const dayEvents = calEvents[dateStr] || [];
+    const maxShow = 3;
+    dayEvents.slice(0, maxShow).forEach(ev => {
+      const tag = document.createElement('div');
+      tag.className = `cal-event cat-${ev.cat||'other'}`;
+      tag.textContent = (ev.time ? ev.time+' ' : '') + ev.name;
+      tag.onclick = e => { e.stopPropagation(); openCalEdit(dateStr, ev.id); };
+      cell.appendChild(tag);
+    });
+    if (dayEvents.length > maxShow) {
+      const more = document.createElement('div');
+      more.className = 'cal-more';
+      more.textContent = `+${dayEvents.length - maxShow} more`;
+      cell.appendChild(more);
+    }
+    grid.appendChild(cell);
+  }
+
+  // next month filler
+  const total = firstDay + daysInMonth;
+  const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= remaining; d++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell other-month';
+    const n = document.createElement('div');
+    n.className = 'cal-day-num';
+    n.textContent = d;
+    cell.appendChild(n);
+    grid.appendChild(cell);
+  }
+}
+
+function renderUpcoming() {
+  const el = document.getElementById('upcoming-list');
+  if (!el) return;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const upcoming = [];
+  Object.keys(calEvents).sort().forEach(dateStr => {
+    const d = new Date(dateStr + 'T00:00:00');
+    if (d >= today) {
+      (calEvents[dateStr]||[]).forEach(ev => upcoming.push({ dateStr, ev, d }));
+    }
+  });
+  const next14 = upcoming.filter(x => (x.d - today) / 86400000 <= 14).slice(0, 10);
+  if (!next14.length) {
+    el.innerHTML = '<div class="upcoming-empty">No upcoming events in the next 2 weeks</div>';
+    return;
+  }
+  el.innerHTML = '';
+  next14.forEach(({ dateStr, ev }) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    const label = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    const row = document.createElement('div');
+    row.className = 'upcoming-event';
+    row.style.cursor = 'pointer';
+    row.onclick = () => openCalEdit(dateStr, ev.id);
+    row.innerHTML = `
+      <div class="upcoming-dot" style="background:${CAT_COLORS[ev.cat||'other']}"></div>
+      <div class="upcoming-info">
+        <div class="upcoming-name">${ev.name}</div>
+        <div class="upcoming-date">${label}${ev.time?' · '+ev.time:''} · ${ev.who||'Family'}</div>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
+window.calNav = function(dir) {
+  if (dir === 0) { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); }
+  else { calMonth += dir; if (calMonth > 11){ calMonth=0; calYear++; } if (calMonth < 0){ calMonth=11; calYear--; } }
+  renderCalendar();
+};
+
+// Add event
+window.openCalAdd = function(dateStr) {
+  editingEventId = null;
+  document.getElementById('cal-modal-title').textContent = 'Add Event';
+  document.getElementById('cal-modal-sub').textContent = '';
+  document.getElementById('cal-name').value = '';
+  document.getElementById('cal-date').value = dateStr || '';
+  document.getElementById('cal-time').value = '';
+  document.getElementById('cal-cat').value = 'other';
+  document.getElementById('cal-who').value = 'Family';
+  document.getElementById('cal-del-row').style.display = 'none';
+  document.getElementById('cal-add-ov').style.display = 'flex';
+};
+
+window.openCalEdit = function(dateStr, id) {
+  const ev = (calEvents[dateStr]||[]).find(e=>e.id===id);
+  if (!ev) return;
+  editingEventId = { dateStr, id };
+  document.getElementById('cal-modal-title').textContent = 'Edit Event';
+  document.getElementById('cal-modal-sub').textContent = '';
+  document.getElementById('cal-name').value = ev.name;
+  document.getElementById('cal-date').value = dateStr;
+  document.getElementById('cal-time').value = ev.time||'';
+  document.getElementById('cal-cat').value = ev.cat||'other';
+  document.getElementById('cal-who').value = ev.who||'Family';
+  document.getElementById('cal-del-row').style.display = 'block';
+  document.getElementById('cal-add-ov').style.display = 'flex';
+  closeCalDay();
+};
+
+window.closeCalAdd = () => { document.getElementById('cal-add-ov').style.display='none'; editingEventId=null; };
+
+window.saveCalEvent = async function() {
+  const name = document.getElementById('cal-name').value.trim();
+  const dateStr = document.getElementById('cal-date').value;
+  if (!name || !dateStr) return;
+  const ev = {
+    id: editingEventId ? editingEventId.id : 'e'+Date.now(),
+    name,
+    time: document.getElementById('cal-time').value,
+    cat:  document.getElementById('cal-cat').value,
+    who:  document.getElementById('cal-who').value,
+  };
+  // if editing and date changed, remove from old date
+  if (editingEventId && editingEventId.dateStr !== dateStr) {
+    calEvents[editingEventId.dateStr] = (calEvents[editingEventId.dateStr]||[]).filter(e=>e.id!==ev.id);
+  }
+  if (editingEventId && editingEventId.dateStr === dateStr) {
+    calEvents[dateStr] = (calEvents[dateStr]||[]).map(e=>e.id===ev.id?ev:e);
+  } else {
+    if (!calEvents[dateStr]) calEvents[dateStr] = [];
+    calEvents[dateStr].push(ev);
+  }
+  closeCalAdd();
+  renderCalendar();
+  await saveCalEvents();
+};
+
+window.deleteCalEvent = async function() {
+  if (!editingEventId) return;
+  if (!confirm('Delete this event?')) return;
+  calEvents[editingEventId.dateStr] = (calEvents[editingEventId.dateStr]||[]).filter(e=>e.id!==editingEventId.id);
+  closeCalAdd();
+  renderCalendar();
+  await saveCalEvents();
+};
+
+// Day detail modal
+window.openCalDay = function(dateStr) {
+  calDaySelected = dateStr;
+  const d = new Date(dateStr+'T00:00:00');
+  document.getElementById('cal-day-title').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const el = document.getElementById('cal-day-events');
+  const events = calEvents[dateStr]||[];
+  if (!events.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:14px;font-weight:600;padding:10px 0">No events this day</div>';
+  } else {
+    el.innerHTML = events.map(ev=>`
+      <div onclick="openCalEdit('${dateStr}','${ev.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+        <div style="width:10px;height:10px;border-radius:50%;background:${CAT_COLORS[ev.cat||'other']};flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700">${ev.name}</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600">${ev.time?ev.time+' · ':''}${ev.who||'Family'}</div>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('cal-day-ov').style.display='flex';
+};
+window.closeCalDay = () => document.getElementById('cal-day-ov').style.display='none';
+
 document.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){closeAdd&&closeAdd();closeDel&&closeDel();closePin&&closePin();closeSet&&closeSet();closeRecipe&&closeRecipe();}
+  if(e.key==='Escape'){closeAdd&&closeAdd();closeDel&&closeDel();closePin&&closePin();closeSet&&closeSet();closeRecipe&&closeRecipe();closeCalAdd&&closeCalAdd();closeCalDay&&closeCalDay();}
 });
 </script>
 </body>
