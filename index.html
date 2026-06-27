@@ -1113,6 +1113,24 @@ async function buildGroceryList(){
   saveChecked();
 }
 
+function buildGroceryText(){
+  const byAisle={};
+  groceryItems.forEach(item=>{
+    const a=item.aisle||'Other';
+    if(!byAisle[a])byAisle[a]=[];
+    byAisle[a].push(item);
+  });
+  let text='🛒 Team Thompson Grocery List\n\n';
+  Object.keys(byAisle).sort().forEach(aisle=>{
+    text+=`── ${aisle} ──\n`;
+    byAisle[aisle].forEach(item=>{
+      text+=`• ${item.name}${item.amount?' ('+item.amount+')':''}\n`;
+    });
+    text+='\n';
+  });
+  return text.trim();
+}
+
 function renderGrocery(){
   const el=document.getElementById('grocery-list');
   const prog=document.getElementById('grocery-progress');
@@ -1122,6 +1140,35 @@ function renderGrocery(){
     prog.textContent=''; return;
   }
   prog.textContent=`${groceryChecked.length} of ${groceryItems.length} items checked off`;
+
+  // Export buttons row
+  const exportRow=document.createElement('div');
+  exportRow.style.cssText='display:flex;gap:8px;margin-bottom:14px;';
+  const copyBtn=document.createElement('button');
+  copyBtn.style.cssText='flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;';
+  copyBtn.textContent='📋 Copy List';
+  copyBtn.onclick=async()=>{
+    await navigator.clipboard.writeText(buildGroceryText());
+    copyBtn.textContent='✓ Copied!';
+    setTimeout(()=>copyBtn.textContent='📋 Copy List',2000);
+  };
+  const shareBtn=document.createElement('button');
+  shareBtn.style.cssText='flex:1;padding:10px;border-radius:10px;border:none;background:var(--meal-green);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
+  shareBtn.textContent='↑ Share List';
+  shareBtn.onclick=async()=>{
+    const text=buildGroceryText();
+    if(navigator.share){
+      try{ await navigator.share({title:'Grocery List',text}); }catch(e){}
+    } else {
+      await navigator.clipboard.writeText(text);
+      shareBtn.textContent='✓ Copied!';
+      setTimeout(()=>shareBtn.textContent='↑ Share List',2000);
+    }
+  };
+  exportRow.appendChild(copyBtn);
+  exportRow.appendChild(shareBtn);
+  el.appendChild(exportRow);
+
   const byAisle={};
   groceryItems.forEach(item=>{
     const a=item.aisle||'Other';
