@@ -939,8 +939,8 @@ function toggleFav(meal){
   saveFavorites();
 }
 function updateMealSub(){
-  const total=Object.values(mealPlan).flat().length;
-  document.getElementById('meal-header-sub').textContent=total===0?'Plan your week':`${total} meal${total!==1?'s':''} planned`;
+  const total=(mealPlan.week||[]).length;
+  document.getElementById('meal-header-sub').textContent=total===0?'Plan your week':`${total} meal${total!==1?'s':''} planned this week`;
 }
 updateMealSub();
 
@@ -989,7 +989,7 @@ function renderMealCards(recipes){
   const grid=document.getElementById('meal-grid');
   grid.innerHTML='';
   recipes.forEach(r=>{
-    const isAdded=Object.values(mealPlan).flat().some(m=>m.id===r.id);
+    const isAdded=(mealPlan.week||[]).some(m=>m.id===r.id);
     const favd=isFav(r.id);
     const meal={id:r.id,title:r.title,image:r.image||'',readyInMinutes:r.readyInMinutes,servings:r.servings};
     const card=document.createElement('div');
@@ -1053,13 +1053,8 @@ window.removeFav = function(id){
 };
 
 window.addMealToPlan = function(id,title,image){
-  const day=prompt(`Add "${title}" to which day?\n\n${MEAL_DAYS.map((d,i)=>`${i+1}. ${d}`).join('\n')}\n\nType a number 1-7:`);
-  if(!day)return;
-  const idx=parseInt(day)-1;
-  if(idx<0||idx>6)return;
-  const dayName=MEAL_DAYS[idx];
-  if(!mealPlan[dayName])mealPlan[dayName]=[];
-  if(!mealPlan[dayName].find(m=>m.id===id))mealPlan[dayName].push({id,title,image});
+  if(!mealPlan.week) mealPlan.week=[];
+  if(!mealPlan.week.find(m=>m.id===id)) mealPlan.week.push({id,title,image});
   saveMealPlan();
   const btn=document.getElementById('addbtn-'+id);
   if(btn){btn.textContent='✓ Added';btn.classList.add('added');}
@@ -1068,19 +1063,19 @@ window.addMealToPlan = function(id,title,image){
 function renderMealPlan(){
   const el=document.getElementById('plan-list');
   el.innerHTML='';
-  const hasMeals=Object.values(mealPlan).some(m=>m.length>0);
-  if(!hasMeals){el.innerHTML='<div class="empty-state">No meals planned yet.<br>Go to Suggest to find meal ideas!</div>';return;}
-  MEAL_DAYS.forEach(day=>{
-    if(!mealPlan[day]||!mealPlan[day].length)return;
-    const block=document.createElement('div');
-    block.className='plan-day';
-    const rows=mealPlan[day].map((m,i)=>`
+  const meals=mealPlan.week||[];
+  if(!meals.length){el.innerHTML='<div class="empty-state">No meals planned yet.<br>Go to Suggest to find meal ideas!</div>';return;}
+  meals.forEach((m,i)=>{
+    const row=document.createElement('div');
+    row.className='plan-day';
+    row.innerHTML=`
       <div class="plan-meal-row">
+        ${m.image?`<img src="${m.image}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0">`:''}
         <div class="plan-meal-name">${m.title}</div>
-        <button class="btn-remove" onclick="removeMeal('${day}',${i})">Remove</button>
-      </div>`).join('');
-    block.innerHTML=`<div class="plan-day-head"><div class="plan-day-name">${day}</div><div style="font-size:12px;color:var(--meal-green);font-weight:700">${mealPlan[day].length} meal${mealPlan[day].length!==1?'s':''}</div></div>${rows}`;
-    el.appendChild(block);
+        <button class="btn-recipe" style="font-size:12px;padding:6px 10px" onclick="openRecipe(${m.id})">Recipe</button>
+        <button class="btn-remove" onclick="removeMeal(${i})">Remove</button>
+      </div>`;
+    el.appendChild(row);
   });
   const gbtn=document.createElement('button');
   gbtn.className='suggest-btn';
@@ -1090,13 +1085,13 @@ function renderMealPlan(){
   el.appendChild(gbtn);
 }
 
-window.removeMeal = function(day,idx){
-  mealPlan[day].splice(idx,1);
+window.removeMeal = function(idx){
+  mealPlan.week.splice(idx,1);
   saveMealPlan(); renderMealPlan();
 };
 
 async function buildGroceryList(){
-  const allIds=Object.values(mealPlan).flat().map(m=>m.id);
+  const allIds=(mealPlan.week||[]).map(m=>m.id);
   if(!allIds.length)return;
   const ingredientMap={};
   for(const id of allIds){
