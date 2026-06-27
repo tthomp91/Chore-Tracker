@@ -742,6 +742,19 @@ body {
       <option value="Taylor">Taylor</option>
       <option value="Kara">Kara</option>
     </select>
+    <label>Repeat</label>
+    <select id="cal-repeat">
+      <option value="none">Does not repeat</option>
+      <option value="daily">Every day</option>
+      <option value="weekly">Every week</option>
+      <option value="biweekly">Every 2 weeks</option>
+      <option value="monthly">Every month</option>
+      <option value="yearly">Every year</option>
+    </select>
+    <div id="cal-repeat-end-row" style="display:none">
+      <label>Repeat ends (optional)</label>
+      <input id="cal-repeat-end" type="date">
+    </div>
     <div class="mrow">
       <button class="mbtn mbtn-no" onclick="closeCalAdd()">Cancel</button>
       <button class="mbtn mbtn-ok" onclick="saveCalEvent()">Save Event</button>
@@ -1369,6 +1382,55 @@ function renderCalendar() {
   if (badge) badge.remove();
 }
 
+// Helper: get all events visible on a given dateStr, including recurring ones
+function getEventsForDate(dateStr) {
+  const deletedIds = (calEvents['__deleted__'] || []);
+  const result = [];
+  const target = new Date(dateStr + 'T00:00:00');
+
+  // Direct events on this date
+  (calEvents[dateStr] || []).forEach(ev => {
+    if (!deletedIds.includes(ev.id)) result.push({ ...ev, _virtual: false });
+  });
+
+  // Check all stored events for recurring matches
+  Object.keys(calEvents).forEach(storedDate => {
+    if (storedDate.startsWith('__')) return;
+    (calEvents[storedDate] || []).forEach(ev => {
+      if (!ev.repeat || deletedIds.includes(ev.id)) return;
+      if (storedDate === dateStr) return; // already added above
+      const origin = new Date(storedDate + 'T00:00:00');
+      if (target <= origin) return;
+      // Check repeat end
+      if (ev.repeatEnd && target > new Date(ev.repeatEnd + 'T00:00:00')) return;
+      // Check if this date matches the repeat rule
+      let matches = false;
+      const diffDays = Math.round((target - origin) / 86400000);
+      if (ev.repeat === 'daily') matches = diffDays > 0;
+      else if (ev.repeat === 'weekly') matches = diffDays % 7 === 0;
+      else if (ev.repeat === 'biweekly') matches = diffDays % 14 === 0;
+      else if (ev.repeat === 'monthly') {
+        matches = target.getDate() === origin.getDate() &&
+          (target.getFullYear() > origin.getFullYear() || target.getMonth() > origin.getMonth());
+      }
+      else if (ev.repeat === 'yearly') {
+        matches = target.getDate() === origin.getDate() &&
+          target.getMonth() === origin.getMonth() &&
+          target.getFullYear() > origin.getFullYear();
+      }
+      if (matches) {
+        // Check if this specific date was skipped
+        const skipped = ev.skipped || [];
+        if (!skipped.includes(dateStr)) {
+          result.push({ ...ev, _virtual: true, _originDate: storedDate });
+        }
+      }
+    });
+  });
+
+  return result;
+}
+
 function renderCalGrid() {
   const grid = document.getElementById('cal-grid');
   if (!grid) return;
@@ -1410,13 +1472,15 @@ function renderCalGrid() {
     n.textContent = d;
     cell.appendChild(n);
 
-    const dayEvents = calEvents[dateStr] || [];
+    const dayEvents = getEventsForDate(dateStr);
     const maxShow = 3;
     dayEvents.slice(0, maxShow).forEach(ev => {
       const tag = document.createElement('div');
       tag.className = `cal-event cat-${ev.cat||'other'}`;
-      tag.textContent = (ev.time ? ev.time+' ' : '') + ev.name;
-      tag.onclick = e => { e.stopPropagation(); openCalEdit(dateStr, ev.id); };
+      const repeatIcon = ev.repeat ? ' 🔁' : '';
+      tag.textContent = (ev.time ? ev.time+' ' : '') + ev.name + repeatIcon;
+      const originDate = ev._virtual ? ev._originDate : dateStr;
+      tag.onclick = e => { e.stopPropagation(); openCalEditVirtual(dateStr, ev.id, originDate); };
       cell.appendChild(tag);
     });
     if (dayEvents.length > maxShow) {
@@ -1442,19 +1506,69 @@ function renderCalGrid() {
   }
 }
 
+// Opens edit modal for an event — virtual means it's a recurring instance shown on a different date than its origin
+window.openCalEditVirtual = function(displayDateStr, id, originDateStr) {
+  // For virtual occurrences, we load the origin event but track the display date for skip/delete logic
+  const ev = (calEvents[originDateStr]||[]).find(e=>e.id===id);
+  if (!ev) return;
+  editingEventId = { dateStr: originDateStr, id, virtualDate: displayDateStr };
+  document.getElementById('cal-modal-title').textContent = 'Edit Event';
+  document.getElementById('cal-modal-sub').textContent = ev.repeat ? `Repeating · ${repeatLabel(ev.repeat)}` : '';
+  document.getElementById('cal-name').value = ev.name;
+  document.getElementById('cal-date').value = originDateStr;
+  document.getElementById('cal-time').value = ev.time||'';
+  document.getElementById('cal-cat').value = ev.cat||'other';
+  document.getElementById('cal-who').value = ev.who||'Family';
+  document.getElementById('cal-repeat').value = ev.repeat||'none';
+  document.getElementById('cal-repeat-end').value = ev.repeatEnd||'';
+  document.getElementById('cal-repeat-end-row').style.display = (ev.repeat && ev.repeat !== 'none') ? 'block' : 'none';
+  const delRow = document.getElementById('cal-del-row');
+  delRow.style.display = 'block';
+  if (ev.repeat && ev.repeat !== 'none') {
+    delRow.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+        <button class="mbtn mbtn-del" onclick="deleteCalEvent(false)">Delete just this occurrence</button>
+        <button class="mbtn mbtn-del" style="opacity:0.75" onclick="deleteCalEvent(true)">Delete all occurrences</button>
+      </div>`;
+  } else {
+    delRow.innerHTML = `<button class="mbtn mbtn-del" style="width:100%" onclick="deleteCalEvent(false)">Delete Event</button>`;
+  }
+  document.getElementById('cal-add-ov').style.display = 'flex';
+  closeCalDay();
+};
+
+function repeatLabel(r) {
+  return { daily:'Daily', weekly:'Weekly', biweekly:'Every 2 weeks', monthly:'Monthly', yearly:'Yearly' }[r] || r;
+}
+
 function renderUpcoming() {
   const el = document.getElementById('upcoming-list');
   if (!el) return;
   const today = new Date();
   today.setHours(0,0,0,0);
   const upcoming = [];
-  Object.keys(calEvents).sort().forEach(dateStr => {
-    const d = new Date(dateStr + 'T00:00:00');
-    if (d >= today) {
-      (calEvents[dateStr]||[]).forEach(ev => upcoming.push({ dateStr, ev, d }));
-    }
+  const deletedIds = calEvents['__deleted__'] || [];
+
+  // Gather a window of the next 14 days
+  for (let offset = 0; offset <= 14; offset++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + offset);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    getEventsForDate(dateStr).forEach(ev => upcoming.push({ dateStr, ev, d: new Date(d) }));
+  }
+
+  // Deduplicate by id+dateStr
+  const seen = new Set();
+  const deduped = upcoming.filter(x => {
+    const key = x.ev.id + '|' + x.dateStr;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
-  const next14 = upcoming.filter(x => (x.d - today) / 86400000 <= 14).slice(0, 10);
+
+  deduped.sort((a,b)=>a.d-b.d);
+  const next14 = deduped.slice(0, 10);
+
   if (!next14.length) {
     el.innerHTML = '<div class="upcoming-empty">No upcoming events in the next 2 weeks</div>';
     return;
@@ -1466,11 +1580,13 @@ function renderUpcoming() {
     const row = document.createElement('div');
     row.className = 'upcoming-event';
     row.style.cursor = 'pointer';
-    row.onclick = () => openCalEdit(dateStr, ev.id);
+    const originDate = ev._virtual ? ev._originDate : dateStr;
+    row.onclick = () => openCalEditVirtual(dateStr, ev.id, originDate);
+    const repeatBadge = ev.repeat ? `<span style="font-size:10px;margin-left:4px">🔁</span>` : '';
     row.innerHTML = `
       <div class="upcoming-dot" style="background:${CAT_COLORS[ev.cat||'other']}"></div>
       <div class="upcoming-info">
-        <div class="upcoming-name">${ev.name}</div>
+        <div class="upcoming-name">${ev.name}${repeatBadge}</div>
         <div class="upcoming-date">${label}${ev.time?' · '+ev.time:''} · ${ev.who||'Family'}</div>
       </div>`;
     el.appendChild(row);
@@ -1493,9 +1609,17 @@ window.openCalAdd = function(dateStr) {
   document.getElementById('cal-time').value = '';
   document.getElementById('cal-cat').value = 'other';
   document.getElementById('cal-who').value = 'Family';
+  document.getElementById('cal-repeat').value = 'none';
+  document.getElementById('cal-repeat-end').value = '';
+  document.getElementById('cal-repeat-end-row').style.display = 'none';
   document.getElementById('cal-del-row').style.display = 'none';
   document.getElementById('cal-add-ov').style.display = 'flex';
 };
+
+// Show/hide the repeat-end field based on repeat selection
+document.getElementById('cal-repeat').addEventListener('change', function() {
+  document.getElementById('cal-repeat-end-row').style.display = this.value === 'none' ? 'none' : 'block';
+});
 
 window.openCalEdit = function(dateStr, id) {
   const ev = (calEvents[dateStr]||[]).find(e=>e.id===id);
@@ -1508,7 +1632,20 @@ window.openCalEdit = function(dateStr, id) {
   document.getElementById('cal-time').value = ev.time||'';
   document.getElementById('cal-cat').value = ev.cat||'other';
   document.getElementById('cal-who').value = ev.who||'Family';
-  document.getElementById('cal-del-row').style.display = 'block';
+  document.getElementById('cal-repeat').value = ev.repeat||'none';
+  document.getElementById('cal-repeat-end').value = ev.repeatEnd||'';
+  document.getElementById('cal-repeat-end-row').style.display = (ev.repeat && ev.repeat !== 'none') ? 'block' : 'none';
+  const delRow = document.getElementById('cal-del-row');
+  delRow.style.display = 'block';
+  if (ev.repeat && ev.repeat !== 'none') {
+    delRow.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+        <button class="mbtn mbtn-del" onclick="deleteCalEvent(false)">Delete just this occurrence</button>
+        <button class="mbtn mbtn-del" style="opacity:0.75" onclick="deleteCalEvent(true)">Delete all occurrences</button>
+      </div>`;
+  } else {
+    delRow.innerHTML = `<button class="mbtn mbtn-del" style="width:100%" onclick="deleteCalEvent(false)">Delete Event</button>`;
+  }
   document.getElementById('cal-add-ov').style.display = 'flex';
   closeCalDay();
 };
@@ -1519,13 +1656,19 @@ window.saveCalEvent = async function() {
   const name = document.getElementById('cal-name').value.trim();
   const dateStr = document.getElementById('cal-date').value;
   if (!name || !dateStr) return;
+  const repeat = document.getElementById('cal-repeat').value;
+  const repeatEnd = document.getElementById('cal-repeat-end').value;
   const ev = {
     id: editingEventId ? editingEventId.id : 'e'+Date.now(),
     name,
     time: document.getElementById('cal-time').value,
     cat:  document.getElementById('cal-cat').value,
     who:  document.getElementById('cal-who').value,
+    repeat: repeat !== 'none' ? repeat : undefined,
+    repeatEnd: (repeat !== 'none' && repeatEnd) ? repeatEnd : undefined,
   };
+  // strip undefined keys
+  Object.keys(ev).forEach(k => ev[k] === undefined && delete ev[k]);
   // if editing and date changed, remove from old date
   if (editingEventId && editingEventId.dateStr !== dateStr) {
     calEvents[editingEventId.dateStr] = (calEvents[editingEventId.dateStr]||[]).filter(e=>e.id!==ev.id);
@@ -1541,10 +1684,32 @@ window.saveCalEvent = async function() {
   await saveCalEvents();
 };
 
-window.deleteCalEvent = async function() {
+window.deleteCalEvent = async function(deleteAll) {
   if (!editingEventId) return;
-  if (!confirm('Delete this event?')) return;
-  calEvents[editingEventId.dateStr] = (calEvents[editingEventId.dateStr]||[]).filter(e=>e.id!==editingEventId.id);
+  if (!confirm(deleteAll ? 'Delete ALL occurrences of this event?' : 'Delete this event?')) return;
+  if (deleteAll) {
+    // Remove the base event from all stored dates
+    Object.keys(calEvents).forEach(dateStr => {
+      if (dateStr.startsWith('__')) return;
+      calEvents[dateStr] = (calEvents[dateStr]||[]).filter(e => e.id !== editingEventId.id);
+    });
+    // Track as fully deleted so virtual occurrences are suppressed
+    if (!calEvents['__deleted__']) calEvents['__deleted__'] = [];
+    if (!calEvents['__deleted__'].includes(editingEventId.id)) {
+      calEvents['__deleted__'].push(editingEventId.id);
+    }
+  } else {
+    const ev = (calEvents[editingEventId.dateStr]||[]).find(e=>e.id===editingEventId.id);
+    if (ev && ev.repeat) {
+      // Skip just this specific occurrence (virtual date or origin date)
+      const skipDate = editingEventId.virtualDate || editingEventId.dateStr;
+      if (!ev.skipped) ev.skipped = [];
+      if (!ev.skipped.includes(skipDate)) ev.skipped.push(skipDate);
+      calEvents[editingEventId.dateStr] = (calEvents[editingEventId.dateStr]||[]).map(e=>e.id===editingEventId.id?ev:e);
+    } else {
+      calEvents[editingEventId.dateStr] = (calEvents[editingEventId.dateStr]||[]).filter(e=>e.id!==editingEventId.id);
+    }
+  }
   closeCalAdd();
   renderCalendar();
   await saveCalEvents();
@@ -1556,18 +1721,22 @@ window.openCalDay = function(dateStr) {
   const d = new Date(dateStr+'T00:00:00');
   document.getElementById('cal-day-title').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const el = document.getElementById('cal-day-events');
-  const events = calEvents[dateStr]||[];
+  const events = getEventsForDate(dateStr);
   if (!events.length) {
     el.innerHTML = '<div style="color:var(--muted);font-size:14px;font-weight:600;padding:10px 0">No events this day</div>';
   } else {
-    el.innerHTML = events.map(ev=>`
-      <div onclick="openCalEdit('${dateStr}','${ev.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+    el.innerHTML = events.map(ev=>{
+      const originDate = ev._virtual ? ev._originDate : dateStr;
+      const repeatBadge = ev.repeat ? ' 🔁' : '';
+      return `
+      <div onclick="openCalEditVirtual('${dateStr}','${ev.id}','${originDate}')" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
         <div style="width:10px;height:10px;border-radius:50%;background:${CAT_COLORS[ev.cat||'other']};flex-shrink:0"></div>
         <div style="flex:1">
-          <div style="font-size:14px;font-weight:700">${ev.name}</div>
+          <div style="font-size:14px;font-weight:700">${ev.name}${repeatBadge}</div>
           <div style="font-size:12px;color:var(--muted);font-weight:600">${ev.time?ev.time+' · ':''}${ev.who||'Family'}</div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
   document.getElementById('cal-day-ov').style.display='flex';
 };
