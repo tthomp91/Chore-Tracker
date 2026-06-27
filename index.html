@@ -61,74 +61,61 @@ body {
   background: var(--cream);
   color: var(--text);
   display: flex;
+  flex-direction: column;
   height: 100vh;
 }
 
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 220px;
-  flex-shrink: 0;
+/* ── TOP NAV ── */
+.topnav {
   background: var(--warm);
-  border-right: 2px solid var(--tan);
+  border-bottom: 2px solid var(--tan);
+  box-shadow: 0 2px 10px var(--shadow);
+  flex-shrink: 0;
   display: flex;
-  flex-direction: column;
-  padding: 24px 0 20px;
-  box-shadow: 2px 0 12px var(--shadow);
+  align-items: center;
+  padding: 0 24px;
+  gap: 0;
+  height: 58px;
 }
-.sidebar-brand {
-  padding: 0 20px 24px;
-  border-bottom: 1.5px solid var(--tan);
-  margin-bottom: 16px;
-}
-.sidebar-brand-name {
+.topnav-brand {
   font-family: 'Nunito', sans-serif;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 900;
   color: var(--brown-d);
-  letter-spacing: -0.5px;
-  line-height: 1.1;
+  letter-spacing: -0.4px;
+  margin-right: 28px;
+  white-space: nowrap;
 }
-.sidebar-brand-sub {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 600;
-  margin-top: 3px;
-}
+.topnav-brand span { color: var(--brown); }
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
+  gap: 7px;
+  padding: 0 16px;
+  height: 100%;
   cursor: pointer;
-  border-radius: 0;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--muted);
   transition: all .15s;
-  border-left: 3px solid transparent;
+  border-bottom: 3px solid transparent;
   font-family: 'Nunito', sans-serif;
   user-select: none;
+  white-space: nowrap;
 }
-.nav-item:hover { background: var(--tan); color: var(--brown-d); }
-.nav-item.active {
-  background: var(--cream);
-  color: var(--brown-d);
-  border-left-color: var(--brown);
-}
-.nav-icon { font-size: 20px; width: 26px; text-align: center; }
+.nav-item:hover { color: var(--brown-d); }
+.nav-item.active { color: var(--brown-d); border-bottom-color: var(--brown); }
+.nav-icon { font-size: 17px; }
 .nav-coming {
-  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  font-size: 10px; font-weight: 700; padding: 2px 6px;
   border-radius: 20px; background: var(--tan); color: var(--muted);
+}
+.topnav-date {
   margin-left: auto;
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding: 16px 20px 0;
-  border-top: 1.5px solid var(--tan);
-}
-.sidebar-date {
-  font-size: 12px; color: var(--muted); font-weight: 600; line-height: 1.5;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ── MAIN CONTENT ── */
@@ -138,6 +125,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   min-width: 0;
+  min-height: 0;
 }
 .page-view {
   display: none;
@@ -474,12 +462,9 @@ body {
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<nav class="sidebar">
-  <div class="sidebar-brand">
-    <div class="sidebar-brand-name">Team<br>Thompson</div>
-    <div class="sidebar-brand-sub">Family HQ</div>
-  </div>
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-brand">Team <span>Thompson</span></div>
   <div class="nav-item active" onclick="showPage('chores')" id="nav-chores">
     <span class="nav-icon">🧹</span> Chores
   </div>
@@ -487,12 +472,9 @@ body {
     <span class="nav-icon">🍽️</span> Meals
   </div>
   <div class="nav-item" onclick="showPage('calendar')" id="nav-calendar">
-    <span class="nav-icon">📅</span> Calendar
-    <span class="nav-coming">Soon</span>
+    <span class="nav-icon">📅</span> Calendar <span class="nav-coming">Soon</span>
   </div>
-  <div class="sidebar-footer">
-    <div class="sidebar-date" id="sidebar-date"></div>
-  </div>
+  <div class="topnav-date" id="sidebar-date"></div>
 </nav>
 
 <!-- MAIN -->
@@ -959,10 +941,10 @@ window.fetchSuggestions = async function() {
   grid.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><br>Finding meal ideas...</div>';
   try {
     const cuisine=selectedCuisine==='Any'?'':`&cuisine=${selectedCuisine}`;
-    const res=await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${MEAL_API}&number=5${cuisine}&addRecipeInformation=true`);
+    const res=await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${MEAL_API}&number=5${cuisine}&addRecipeInformation=true&sort=random`);
     const data=await res.json();
-    if(!data.recipes||!data.recipes.length){grid.innerHTML='<div class="spinner-wrap">No results. Try a different cuisine!</div>';return;}
-    renderMealCards(data.recipes);
+    if(!data.results||!data.results.length){grid.innerHTML='<div class="spinner-wrap">No results. Try a different cuisine!</div>';return;}
+    renderMealCards(data.results);
   } catch(e){grid.innerHTML='<div class="spinner-wrap">Something went wrong. Try again.</div>';}
   finally{btn.disabled=false;btn.textContent='Find Meal Ideas';}
 };
