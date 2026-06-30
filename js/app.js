@@ -424,13 +424,19 @@ window.addPantryMealToPlan = function(title, emoji) {
 window.fetchSuggestions = async function() {
   const btn=document.getElementById('suggest-btn');
   const grid=document.getElementById('meal-grid');
+  const searchInput=document.getElementById('meal-search-input');
+  const query=searchInput?searchInput.value.trim():'';
   btn.disabled=true; btn.textContent='Finding meals...';
   grid.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><br>Finding meal ideas...</div>';
   try {
     const cuisine=selectedCuisine==='Any'?'':`&cuisine=${selectedCuisine}`;
-    const res=await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${MEAL_API}&number=5${cuisine}&addRecipeInformation=true&sort=random`);
+    const search=query?`&query=${encodeURIComponent(query)}`:'';
+    const res=await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${MEAL_API}&number=8${cuisine}${search}&addRecipeInformation=true&sort=random`);
     const data=await res.json();
-    if(!data.results||!data.results.length){grid.innerHTML='<div class="spinner-wrap">No results. Try a different cuisine!</div>';return;}
+    if(!data.results||!data.results.length){
+      grid.innerHTML=`<div class="spinner-wrap">No results${query?` for "${query}"`:''}. Try a different search or cuisine!</div>`;
+      return;
+    }
     renderMealCards(data.results);
   } catch(e){grid.innerHTML='<div class="spinner-wrap">Something went wrong. Try again.</div>';}
   finally{btn.disabled=false;btn.textContent='Find Meal Ideas';}
