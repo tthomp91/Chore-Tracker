@@ -1588,10 +1588,7 @@ function renderCalendar() {
   if (label) label.textContent = `${MONTHS[calMonth]} ${calYear}`;
   renderCalGrid();
   renderUpcoming();
-  // update nav item "Soon" badge -- remove it now calendar is live
-  const navCal = document.getElementById('nav-calendar');
-  const badge = navCal && navCal.querySelector('.nav-coming');
-  if (badge) badge.remove();
+
 }
 
 // Helper: get all events visible on a given dateStr, including recurring ones
