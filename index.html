@@ -599,7 +599,7 @@ body {
     <span class="nav-icon">🍽️</span> Meals
   </div>
   <div class="nav-item" onclick="showPage('calendar')" id="nav-calendar">
-    <span class="nav-icon">📅</span> Calendar <span class="nav-coming">Soon</span>
+    <span class="nav-icon">📅</span> Calendar
   </div>
   <div class="topnav-date" id="sidebar-date"></div>
 </nav>
@@ -662,7 +662,30 @@ body {
 
       <!-- Suggest -->
       <div class="meal-page active" id="meal-suggest">
-        <div class="section-label">Cuisine type</div>
+
+        <!-- What's in your fridge -->
+        <div id="pantry-box" style="background:var(--card);border-radius:14px;border:1.5px solid var(--border);box-shadow:0 2px 8px var(--shadow);padding:16px;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:22px;">🧑‍🍳</span>
+            <div>
+              <div style="font-family:'Nunito',sans-serif;font-size:15px;font-weight:900;color:var(--text);">What's in your fridge?</div>
+              <div style="font-size:12px;color:var(--muted);font-weight:600;">Get meal ideas from ingredients you already have</div>
+            </div>
+          </div>
+          <div id="pantry-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:32px;"></div>
+          <div style="display:flex;gap:8px;">
+            <input id="pantry-input" type="text" placeholder="e.g. chicken, rice, garlic…"
+              style="flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);font-size:14px;font-family:inherit;background:var(--cream);color:var(--text);outline:none;"
+              onkeydown="if(event.key==='Enter'||event.key===',')addPantryTag(event)">
+            <button onclick="addPantryTag()" style="padding:10px 16px;border-radius:10px;border:none;background:var(--meal-orange);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">Add</button>
+          </div>
+          <button id="pantry-suggest-btn" onclick="fetchPantrySuggestions()"
+            style="width:100%;margin-top:12px;padding:13px;border-radius:12px;border:none;background:var(--meal-green);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;display:none;transition:opacity .15s;">
+            🍽️ Suggest Meals from My Ingredients
+          </button>
+        </div>
+
+        <div class="section-label">Or browse by cuisine</div>
         <div class="cuisine-row" id="cuisine-row"></div>
         <button class="suggest-btn" id="suggest-btn" onclick="fetchSuggestions()">Find Meal Ideas</button>
         <div class="meal-grid" id="meal-grid"></div>
@@ -1148,6 +1171,128 @@ window.showMealTab = function(name) {
   if(name==='plan') renderMealPlan();
   if(name==='grocery') renderGrocery();
   if(name==='favorites') renderFavorites();
+};
+
+// ── PANTRY / FRIDGE SUGGESTIONS ──────────────────────────────────────────────
+let pantryIngredients = [];
+
+window.addPantryTag = function(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('pantry-input');
+  const raw = input.value.trim().replace(/,+$/, '');
+  if (!raw) return;
+  const items = raw.split(',').map(s => s.trim()).filter(Boolean);
+  items.forEach(item => {
+    if (item && !pantryIngredients.includes(item.toLowerCase())) {
+      pantryIngredients.push(item.toLowerCase());
+    }
+  });
+  input.value = '';
+  renderPantryTags();
+};
+
+function renderPantryTags() {
+  const el = document.getElementById('pantry-tags');
+  el.innerHTML = '';
+  pantryIngredients.forEach((ing, i) => {
+    const tag = document.createElement('div');
+    tag.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;background:var(--meal-green-l);border:1.5px solid var(--meal-green-b);font-size:12px;font-weight:700;color:var(--meal-green);';
+    tag.innerHTML = `${ing} <span onclick="removePantryTag(${i})" style="cursor:pointer;font-size:14px;line-height:1;opacity:0.6;">×</span>`;
+    el.appendChild(tag);
+  });
+  document.getElementById('pantry-suggest-btn').style.display = pantryIngredients.length > 0 ? 'block' : 'none';
+}
+
+window.removePantryTag = function(i) {
+  pantryIngredients.splice(i, 1);
+  renderPantryTags();
+};
+
+window.fetchPantrySuggestions = async function() {
+  if (!pantryIngredients.length) return;
+  const btn = document.getElementById('pantry-suggest-btn');
+  const grid = document.getElementById('meal-grid');
+  btn.disabled = true;
+  btn.textContent = '🔍 Finding meals...';
+  grid.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><br>Finding meals from your ingredients...</div>';
+  try {
+    const prompt = `I have these ingredients at home: ${pantryIngredients.join(', ')}.
+
+Suggest 4 meals I can make. Respond ONLY with valid JSON, no extra text, no markdown:
+[
+  {
+    "title": "Meal Name",
+    "emoji": "🍗",
+    "readyInMinutes": 30,
+    "servings": 4,
+    "usedIngredients": ["chicken", "garlic"],
+    "missingIngredients": ["lemon", "herbs"],
+    "description": "One sentence description of the dish."
+  }
+]`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content[0].text.trim();
+    const clean = text.replace(/```json|```/g, '').trim();
+    const meals = JSON.parse(clean);
+    renderPantryMealCards(meals);
+  } catch(e) {
+    grid.innerHTML = '<div class="spinner-wrap">Something went wrong. Try again!</div>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🍽️ Suggest Meals from My Ingredients';
+  }
+};
+
+function renderPantryMealCards(meals) {
+  const grid = document.getElementById('meal-grid');
+  grid.innerHTML = '';
+  const header = document.createElement('div');
+  header.style.cssText = 'font-size:12px;color:var(--muted);font-weight:700;margin-bottom:12px;padding:8px 12px;background:var(--meal-green-l);border-radius:8px;border:1px solid var(--meal-green-b);';
+  header.textContent = `✅ Based on: ${pantryIngredients.join(', ')}`;
+  grid.appendChild(header);
+  meals.forEach(m => {
+    const card = document.createElement('div');
+    card.className = 'meal-card';
+    const usedHtml = (m.usedIngredients||[]).map(i => `<span style="background:var(--meal-green-l);color:var(--meal-green);border:1px solid var(--meal-green-b);border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;">✓ ${i}</span>`).join('');
+    const missingHtml = (m.missingIngredients||[]).length
+      ? m.missingIngredients.map(i => `<span style="background:#FFF7ED;color:#EA580C;border:1px solid #FED7AA;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;">+ ${i}</span>`).join('')
+      : '';
+    card.innerHTML = `
+      <div class="meal-img-ph" style="font-size:52px;">${m.emoji||'🍽️'}</div>
+      <div class="meal-body">
+        <div class="meal-name">${m.title}</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px;line-height:1.4;">${m.description}</div>
+        <div class="meal-meta">
+          ${m.readyInMinutes?`<span>⏱ ${m.readyInMinutes} min</span>`:''}
+          ${m.servings?`<span>👤 Serves ${m.servings}</span>`:''}
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">${usedHtml}${missingHtml}</div>
+        <div class="meal-actions">
+          <button class="btn-add" onclick="addPantryMealToPlan('${m.title.replace(/'/g,"\\'")}','${m.emoji||'🍽️'}')">+ Add to Plan</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+window.addPantryMealToPlan = function(title, emoji) {
+  if (!mealPlan.week) mealPlan.week = [];
+  const id = 'pantry_' + Date.now();
+  if (!mealPlan.week.find(m => m.title === title)) {
+    mealPlan.week.push({ id, title, image: '', emoji });
+  }
+  saveMealPlan();
+  alert(`"${title}" added to your meal plan!`);
 };
 
 window.fetchSuggestions = async function() {
