@@ -427,7 +427,7 @@ window.fetchSuggestions = async function() {
   grid.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><br>Finding meal ideas...</div>';
   try {
     const cuisine=selectedCuisine==='Any'?'':`&cuisine=${selectedCuisine}`;
-    const res=await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${MEAL_API}&number=6${cuisine}&addRecipeInformation=true&sort=random`);
+    const res=await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${MEAL_API}&number=5${cuisine}&addRecipeInformation=true&sort=random`);
     const data=await res.json();
     if(!data.results||!data.results.length){grid.innerHTML='<div class="spinner-wrap">No results. Try a different cuisine!</div>';return;}
     renderMealCards(data.results);
