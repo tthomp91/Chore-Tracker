@@ -71,8 +71,22 @@ const CHORE_DEFAULTS = {
 let CS = { chores: JSON.parse(JSON.stringify(CHORE_DEFAULTS)), pin:'1234', lastDailyReset:'', lastWeeklyReset:'' };
 let pinBuf = '', delTarget = null, addCol = null, _ignoreNext = false;
 
-function todayStr()     { return new Date().toISOString().slice(0,10); }
-function lastSundayStr(){ const n=new Date(),s=new Date(n); s.setDate(n.getDate()-n.getDay()); return s.toISOString().slice(0,10); }
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function lastSundayStr() {
+  const n = new Date();
+  const s = new Date(n);
+  s.setDate(n.getDate() - n.getDay());
+  const y = s.getFullYear();
+  const m = String(s.getMonth()+1).padStart(2,'0');
+  const day = String(s.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 
 function clearChores(types) {
   types.forEach(t => CS.chores[t] && CS.chores[t].forEach(c => {
@@ -341,34 +355,21 @@ window.fetchPantrySuggestions = async function() {
   btn.textContent = '🔍 Finding meals...';
   grid.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><br>Finding meals from your ingredients...</div>';
   try {
-    const prompt = `I have these ingredients at home: ${pantryIngredients.join(', ')}.
-
-Suggest 4 meals I can make. Respond ONLY with valid JSON, no extra text, no markdown:
-[
-  {
-    "title": "Meal Name",
-    "emoji": "🍗",
-    "readyInMinutes": 30,
-    "servings": 4,
-    "usedIngredients": ["chicken", "garlic"],
-    "missingIngredients": ["lemon", "herbs"],
-    "description": "One sentence description of the dish."
-  }
-]`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    // Calls our own backend, which holds the API key. Update this URL
+    // to your actual Vercel deployment once it's live, e.g.
+    // https://team-thompson-backend.vercel.app/api/suggest-meals
+    const res = await fetch('/api/suggest-meals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify({ ingredients: pantryIngredients })
     });
-    const data = await res.json();
-    const text = data.content[0].text.trim();
-    const clean = text.replace(/```json|```/g, '').trim();
-    const meals = JSON.parse(clean);
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Request failed');
+    }
+
+    const { meals } = await res.json();
     renderPantryMealCards(meals);
   } catch(e) {
     grid.innerHTML = '<div class="spinner-wrap">Something went wrong. Try again!</div>';
