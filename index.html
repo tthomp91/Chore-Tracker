@@ -113,8 +113,18 @@
           </button>
         </div>
 
+        <div class="section-label">Search meals</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <input id="meal-search-input" type="text" placeholder="e.g. chicken, tacos, soup…"
+            style="flex:1;padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);font-size:14px;font-family:inherit;background:var(--card);color:var(--text);outline:none;"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();fetchSuggestions();}">
+          <button onclick="document.getElementById('meal-search-input').value='';fetchSuggestions()"
+            style="padding:11px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Clear</button>
+        </div>
+
         <div class="section-label">Or browse by cuisine</div>
         <div class="cuisine-row" id="cuisine-row"></div>
+        <div style="font-size:11px;color:var(--muted);font-weight:600;margin:-8px 0 14px;">Searching a term checks all cuisines unless you pick one above</div>
         <button class="suggest-btn" id="suggest-btn" onclick="fetchSuggestions()">Find Meal Ideas</button>
         <div class="meal-grid" id="meal-grid"></div>
       </div>
