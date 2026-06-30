@@ -1,0 +1,8 @@
+/* ── COMING SOON ── */
+.coming-soon {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: var(--muted); text-align: center; padding: 40px;
+}
+.coming-soon-icon { font-size: 56px; margin-bottom: 16px; }
+.coming-soon h2 { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: var(--brown-d); margin-bottom: 8px; }
+.coming-soon p { font-size: 14px; font-weight: 600; line-height: 1.6; }
