@@ -71,22 +71,8 @@ const CHORE_DEFAULTS = {
 let CS = { chores: JSON.parse(JSON.stringify(CHORE_DEFAULTS)), pin:'1234', lastDailyReset:'', lastWeeklyReset:'' };
 let pinBuf = '', delTarget = null, addCol = null, _ignoreNext = false;
 
-function todayStr() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-function lastSundayStr() {
-  const n = new Date();
-  const s = new Date(n);
-  s.setDate(n.getDate() - n.getDay());
-  const y = s.getFullYear();
-  const m = String(s.getMonth()+1).padStart(2,'0');
-  const day = String(s.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
+function todayStr()     { return new Date().toISOString().slice(0,10); }
+function lastSundayStr(){ const n=new Date(),s=new Date(n); s.setDate(n.getDate()-n.getDay()); return s.toISOString().slice(0,10); }
 
 function clearChores(types) {
   types.forEach(t => CS.chores[t] && CS.chores[t].forEach(c => {
@@ -355,21 +341,34 @@ window.fetchPantrySuggestions = async function() {
   btn.textContent = '🔍 Finding meals...';
   grid.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><br>Finding meals from your ingredients...</div>';
   try {
-    // Calls our own backend, which holds the API key. Update this URL
-    // to your actual Vercel deployment once it's live, e.g.
-    // https://team-thompson-backend.vercel.app/api/suggest-meals
-    const res = await fetch('/api/suggest-meals', {
+    const prompt = `I have these ingredients at home: ${pantryIngredients.join(', ')}.
+
+Suggest 4 meals I can make. Respond ONLY with valid JSON, no extra text, no markdown:
+[
+  {
+    "title": "Meal Name",
+    "emoji": "🍗",
+    "readyInMinutes": 30,
+    "servings": 4,
+    "usedIngredients": ["chicken", "garlic"],
+    "missingIngredients": ["lemon", "herbs"],
+    "description": "One sentence description of the dish."
+  }
+]`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ingredients: pantryIngredients })
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
     });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || 'Request failed');
-    }
-
-    const { meals } = await res.json();
+    const data = await res.json();
+    const text = data.content[0].text.trim();
+    const clean = text.replace(/```json|```/g, '').trim();
+    const meals = JSON.parse(clean);
     renderPantryMealCards(meals);
   } catch(e) {
     grid.innerHTML = '<div class="spinner-wrap">Something went wrong. Try again!</div>';
@@ -404,39 +403,76 @@ function renderPantryMealCards(meals) {
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">${usedHtml}${missingHtml}</div>
         <div class="meal-actions">
-          <button class="btn-add" onclick="addPantryMealToPlan('${m.title.replace(/'/g,"\\'")}','${m.emoji||'🍽️'}')">+ Add to Plan</button>
+          <button class="btn-add" onclick="addPantryMealToPlan('${m.title.replace(/'/g,"\\'")}','${m.emoji||'🍽️'}',this)">+ Add to Plan</button>
         </div>
       </div>`;
     grid.appendChild(card);
   });
 }
 
-window.addPantryMealToPlan = function(title, emoji) {
+window.addPantryMealToPlan = function(title, emoji, btn) {
   if (!mealPlan.week) mealPlan.week = [];
   const id = 'pantry_' + Date.now();
   if (!mealPlan.week.find(m => m.title === title)) {
     mealPlan.week.push({ id, title, image: '', emoji });
   }
   saveMealPlan();
-  alert(`"${title}" added to your meal plan!`);
+  if (btn) { btn.textContent = "✓ Added"; btn.classList.add("added"); }
+  showToast(`${emoji} "${title}" added to your plan!`);
 };
+
+function showToast(message) {
+  // Remove any existing toast
+  const existing = document.getElementById('meal-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'meal-toast';
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Nunito Sans', sans-serif;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  `;
+
+  document.body.appendChild(toast);
+
+  // Fade in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { toast.style.opacity = '1'; });
+  });
+
+  // Fade out after 3 seconds
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 250);
+  }, 3000);
+}
 
 window.fetchSuggestions = async function() {
   const btn=document.getElementById('suggest-btn');
   const grid=document.getElementById('meal-grid');
-  const searchInput=document.getElementById('meal-search-input');
-  const query=searchInput?searchInput.value.trim():'';
   btn.disabled=true; btn.textContent='Finding meals...';
   grid.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><br>Finding meal ideas...</div>';
   try {
     const cuisine=selectedCuisine==='Any'?'':`&cuisine=${selectedCuisine}`;
-    const search=query?`&query=${encodeURIComponent(query)}`:'';
-    const res=await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${MEAL_API}&number=8${cuisine}${search}&addRecipeInformation=true&sort=random`);
+    const res=await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${MEAL_API}&number=5${cuisine}&addRecipeInformation=true&sort=random`);
     const data=await res.json();
-    if(!data.results||!data.results.length){
-      grid.innerHTML=`<div class="spinner-wrap">No results${query?` for "${query}"`:''}. Try a different search or cuisine!</div>`;
-      return;
-    }
+    if(!data.results||!data.results.length){grid.innerHTML='<div class="spinner-wrap">No results. Try a different cuisine!</div>';return;}
     renderMealCards(data.results);
   } catch(e){grid.innerHTML='<div class="spinner-wrap">Something went wrong. Try again.</div>';}
   finally{btn.disabled=false;btn.textContent='Find Meal Ideas';}
